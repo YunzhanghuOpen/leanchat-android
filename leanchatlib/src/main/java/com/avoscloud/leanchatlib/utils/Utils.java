@@ -82,7 +82,7 @@ public class Utils {
             JSONObject rpJSON = (JSONObject) attrs.get(RedPacketUtils.KEY_RED_PACKET);
             if (rpJSON != null && rpJSON.size() != 0) {
                 String money_greeting = rpJSON.getString(RedPacketUtils.EXTRA_RED_PACKET_GREETING);
-                return "[LeanCloud红包]" + money_greeting;
+                return "[" + context.getResources().getString(R.string.leancloud_luckymoney) + "]" + money_greeting;
             }
         }
         return EmotionHelper.replace(context, ((AVIMTextMessage) message).getText());
@@ -134,7 +134,7 @@ public class Utils {
         } catch (JSONException exception) {
             exception.printStackTrace();
         }
-        return "[LeanCloud 红包]";
+        return "[" + context.getResources().getString(R.string.leancloud_luckymoney) + "]";
     }
 
     private static boolean filterException(Exception e) {

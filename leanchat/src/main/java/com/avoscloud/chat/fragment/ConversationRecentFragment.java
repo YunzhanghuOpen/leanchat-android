@@ -22,6 +22,7 @@ import com.avoscloud.chat.util.UserCacheUtils;
 import com.avoscloud.leanchatlib.controller.ConversationHelper;
 import com.avoscloud.leanchatlib.event.ConnectionChangeEvent;
 import com.avoscloud.leanchatlib.event.ConversationItemClickEvent;
+import com.avoscloud.leanchatlib.event.ImMessageEvent;
 import com.avoscloud.leanchatlib.event.ImTypeMessageEvent;
 import com.avoscloud.leanchatlib.model.ConversationType;
 import com.avoscloud.leanchatlib.model.Room;
@@ -42,148 +43,157 @@ import de.greenrobot.event.EventBus;
  */
 public class ConversationRecentFragment extends BaseFragment {
 
-  @Bind(R.id.im_client_state_view)
-  View imClientStateView;
+    @Bind(R.id.im_client_state_view)
+    View imClientStateView;
 
-  @Bind(R.id.fragment_conversation_srl_pullrefresh)
-  protected SwipeRefreshLayout refreshLayout;
+    @Bind(R.id.fragment_conversation_srl_pullrefresh)
+    protected SwipeRefreshLayout refreshLayout;
 
-  @Bind(R.id.fragment_conversation_srl_view)
-  protected RecyclerView recyclerView;
+    @Bind(R.id.fragment_conversation_srl_view)
+    protected RecyclerView recyclerView;
 
-  protected ConversationListAdapter<Room> itemAdapter;
-  protected LinearLayoutManager layoutManager;
+    protected ConversationListAdapter<Room> itemAdapter;
+    protected LinearLayoutManager layoutManager;
 
-  private boolean hidden;
-  private ConversationManager conversationManager;
+    private boolean hidden;
+    private ConversationManager conversationManager;
 
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.message_fragment, container, false);
-    ButterKnife.bind(this, view);
-    conversationManager = ConversationManager.getInstance();
-    refreshLayout.setEnabled(false);
-    layoutManager = new LinearLayoutManager(getActivity());
-    recyclerView.setLayoutManager(layoutManager);
-    itemAdapter = new ConversationListAdapter<Room>();
-    recyclerView.setAdapter(itemAdapter);
-    EventBus.getDefault().register(this);
-    return view;
-  }
-
-  @Override
-  public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-    headerLayout.showTitle(R.string.conversation_messages);
-    updateConversationList();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    EventBus.getDefault().unregister(this);
-  }
-
-  @Override
-  public void onHiddenChanged(boolean hidden) {
-    super.onHiddenChanged(hidden);
-    this.hidden = hidden;
-    if (!hidden) {
-      updateConversationList();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.message_fragment, container, false);
+        ButterKnife.bind(this, view);
+        conversationManager = ConversationManager.getInstance();
+        refreshLayout.setEnabled(false);
+        layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        itemAdapter = new ConversationListAdapter<Room>();
+        recyclerView.setAdapter(itemAdapter);
+        EventBus.getDefault().register(this);
+        return view;
     }
-  }
 
-  @Override
-  public void onResume() {
-    super.onResume();
-    if (!hidden) {
-      updateConversationList();
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        headerLayout.showTitle(R.string.conversation_messages);
+        updateConversationList();
     }
-  }
 
-  public void onEvent(ConversationItemClickEvent event) {
-    Intent intent = new Intent(getActivity(), ChatRoomActivity.class);
-    intent.putExtra(Constants.CONVERSATION_ID, event.conversationId);
-    startActivity(intent);
-  }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        EventBus.getDefault().unregister(this);
+    }
 
-  public void onEvent(ImTypeMessageEvent event) {
-    updateConversationList();
-  }
-
-  private void updateConversationList() {
-    conversationManager.findAndCacheRooms(new Room.MultiRoomsCallback() {
-      @Override
-      public void done(List<Room> roomList, AVException exception) {
-        if (filterException(exception)) {
-
-          updateLastMessage(roomList);
-          cacheRelatedUsers(roomList);
-
-          List<Room> sortedRooms = sortRooms(roomList);
-          itemAdapter.setDataList(sortedRooms);
-          itemAdapter.notifyDataSetChanged();
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        this.hidden = hidden;
+        if (!hidden) {
+            updateConversationList();
         }
-      }
-    });
-  }
+    }
 
-  private void updateLastMessage(final List<Room> roomList) {
-    for (final Room room : roomList) {
-      AVIMConversation conversation = room.getConversation();
-      if (null != conversation) {
-        conversation.getLastMessage(new AVIMSingleMessageQueryCallback() {
-          @Override
-          public void done(AVIMMessage avimMessage, AVIMException e) {
-            if (filterException(e) && null != avimMessage) {
-              room.setLastMessage(avimMessage);
-              int index = roomList.indexOf(room);
-              itemAdapter.notifyItemChanged(index);
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!hidden) {
+            updateConversationList();
+        }
+    }
+
+    public void onEvent(ConversationItemClickEvent event) {
+        Intent intent = new Intent(getActivity(), ChatRoomActivity.class);
+        intent.putExtra(Constants.CONVERSATION_ID, event.conversationId);
+        startActivity(intent);
+    }
+
+    public void onEvent(ImTypeMessageEvent event) {
+        updateConversationList();
+    }
+
+    private void updateConversationList() {
+        conversationManager.findAndCacheRooms(new Room.MultiRoomsCallback() {
+            @Override
+            public void done(List<Room> roomList, AVException exception) {
+                if (filterException(exception)) {
+
+                    updateLastMessage(roomList);
+                    cacheRelatedUsers(roomList);
+
+                    List<Room> sortedRooms = sortRooms(roomList);
+                    itemAdapter.setDataList(sortedRooms);
+                    itemAdapter.notifyDataSetChanged();
+                }
             }
-          }
         });
-      }
     }
-  }
 
-  private void cacheRelatedUsers(List<Room> rooms) {
-    List<String> needCacheUsers = new ArrayList<String>();
-    for(Room room : rooms) {
-      AVIMConversation conversation = room.getConversation();
-      if (ConversationHelper.typeOfConversation(conversation) == ConversationType.Single) {
-        needCacheUsers.add(ConversationHelper.otherIdOfConversation(conversation));
-      }
-    }
-    UserCacheUtils.fetchUsers(needCacheUsers, new UserCacheUtils.CacheUserCallback() {
-      @Override
-      public void done(List<LeanchatUser> userList, Exception e) {
-        itemAdapter.notifyDataSetChanged();
-      }
-    });
-  }
-
-  private List<Room> sortRooms(final List<Room> roomList) {
-    List<Room> sortedList = new ArrayList<Room>();
-    if (null != roomList) {
-      sortedList.addAll(roomList);
-      Collections.sort(sortedList, new Comparator<Room>() {
-        @Override
-        public int compare(Room lhs, Room rhs) {
-          long value = lhs.getLastModifyTime() - rhs.getLastModifyTime();
-          if (value > 0) {
-            return -1;
-          } else if (value < 0) {
-            return 1;
-          } else {
-            return 0;
-          }
+    private void updateLastMessage(final List<Room> roomList) {
+        for (final Room room : roomList) {
+            AVIMConversation conversation = room.getConversation();
+            if (null != conversation) {
+                conversation.getLastMessage(new AVIMSingleMessageQueryCallback() {
+                    @Override
+                    public void done(AVIMMessage avimMessage, AVIMException e) {
+                        if (filterException(e) && null != avimMessage) {
+                            room.setLastMessage(avimMessage);
+                            int index = roomList.indexOf(room);
+                            itemAdapter.notifyItemChanged(index);
+                        }
+                    }
+                });
+            }
         }
-      });
     }
-    return sortedList;
-  }
 
-  public void onEvent(ConnectionChangeEvent event) {
-    imClientStateView.setVisibility(event.isConnect ? View.GONE : View.VISIBLE);
-  }
+    private void cacheRelatedUsers(List<Room> rooms) {
+        List<String> needCacheUsers = new ArrayList<String>();
+        for (Room room : rooms) {
+            AVIMConversation conversation = room.getConversation();
+            if (ConversationHelper.typeOfConversation(conversation) == ConversationType.Single) {
+                needCacheUsers.add(ConversationHelper.otherIdOfConversation(conversation));
+            }
+        }
+        UserCacheUtils.fetchUsers(needCacheUsers, new UserCacheUtils.CacheUserCallback() {
+            @Override
+            public void done(List<LeanchatUser> userList, Exception e) {
+                itemAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private List<Room> sortRooms(final List<Room> roomList) {
+        List<Room> sortedList = new ArrayList<Room>();
+        if (null != roomList) {
+            sortedList.addAll(roomList);
+            Collections.sort(sortedList, new Comparator<Room>() {
+                @Override
+                public int compare(Room lhs, Room rhs) {
+                    long value = lhs.getLastModifyTime() - rhs.getLastModifyTime();
+                    if (value > 0) {
+                        return -1;
+                    } else if (value < 0) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
+        }
+        return sortedList;
+    }
+
+    public void onEvent(ConnectionChangeEvent event) {
+        imClientStateView.setVisibility(event.isConnect ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * 会话页刷新红包消息
+     *
+     * @param event
+     */
+    public void onEvent(ImMessageEvent event) {
+        updateConversationList();
+    }
 }

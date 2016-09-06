@@ -87,7 +87,7 @@ public class ProfileFragment extends BaseFragment {
 
   @OnClick(R.id.profile_redpacket_view)
   public void onRPClick() {
-    RedPacketUtils.getInstance().toChangeActivity(getActivity());
+    RedPacketUtils.getInstance().toChangeActivity(getActivity(),LeanchatUser.getCurrentUser().getUsername(),LeanchatUser.getCurrentUser().getAvatarUrl());
   }
 
   @OnClick(R.id.profile_logout_btn)

@@ -20,10 +20,10 @@ import cn.leancloud.chatkit.adapter.LCIMChatAdapter;
  */
 public class ChatAdapter extends LCIMChatAdapter {
 
-  private final int ITEM_LEFT_TEXT_REDPACKET = 1005;
-  private final int ITEM_RIGHT_TEXT_REDPACKET = 2005;
-  private final int ITEM_TEXT_REDPACKET_NOTIFY = 3000;
-  private final int ITEM_TEXT_REDPACKET_NOTIFY_MEMBER = 3001;
+  private final int ITEM_LEFT_TEXT_REDPACKET = 1005;//自己不是发送红包者
+  private final int ITEM_RIGHT_TEXT_REDPACKET = 2005;//自己是发送红包者
+  private final int ITEM_TEXT_REDPACKET_NOTIFY = 3000;//会话详情显示领取红包后显示的回执消息(自己是发送者或者是接收者)
+  private final int ITEM_TEXT_REDPACKET_NOTIFY_MEMBER = 3001;//会话详情页领取红包后回执的空消息(自己不是发送者也不是接收者)
 
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -40,6 +40,10 @@ public class ChatAdapter extends LCIMChatAdapter {
         return super.onCreateViewHolder(parent, viewType);
     }
   }
+
+  /**
+   * 判断是什么消息类型
+   */
 
   @Override
   public int getItemViewType(int position) {

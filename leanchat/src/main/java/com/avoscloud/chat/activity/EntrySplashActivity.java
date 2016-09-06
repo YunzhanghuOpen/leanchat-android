@@ -10,8 +10,6 @@ import com.avos.avoscloud.im.v2.AVIMException;
 import com.avos.avoscloud.im.v2.callback.AVIMClientCallback;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.model.LeanchatUser;
-import com.avoscloud.chat.redpacket.RedPacketUtils;
-import com.avoscloud.chat.redpacket.RequestTask;
 
 import cn.leancloud.chatkit.LCChatKit;
 
@@ -25,7 +23,6 @@ public class EntrySplashActivity extends AVBaseActivity {
     public void handleMessage(Message msg) {
       switch (msg.what) {
         case GO_MAIN_MSG:
-          RedPacketUtils.getInstance().initUserData(LeanchatUser.getCurrentUserId(), LeanchatUser.getCurrentUser().getUsername(), LeanchatUser.getCurrentUser().getAvatarUrl());
           imLogin();
           break;
         case GO_LOGIN_MSG:
@@ -55,7 +52,6 @@ public class EntrySplashActivity extends AVBaseActivity {
       @Override
       public void done(AVIMClient avimClient, AVIMException e) {
         if (filterException(e)) {
-          RequestTask.getInstance().initRedPacketNet(getApplicationContext(), LeanchatUser.getCurrentUserId());
           Intent intent = new Intent(EntrySplashActivity.this, MainActivity.class);
           startActivity(intent);
           finish();

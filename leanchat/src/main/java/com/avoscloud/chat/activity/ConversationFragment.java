@@ -21,11 +21,14 @@ import com.avoscloud.chat.event.RedPacketAckEvent;
 import com.avoscloud.chat.model.ConversationType;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
 import com.avoscloud.chat.model.LeanchatUser;
+import com.avoscloud.chat.redpacket.GetGroupMemberCallback;
 import com.avoscloud.chat.redpacket.RedPacketUtils;
-import com.avoscloud.chat.redpacket.UserInfoCallback;
 import com.avoscloud.chat.util.ConversationUtils;
 import com.yunzhanghu.redpacketsdk.bean.RPUserBean;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
+import com.yunzhanghu.redpacketui.callback.GroupMemberCallback;
+import com.yunzhanghu.redpacketui.callback.NotifyGroupMemberCallback;
+import com.yunzhanghu.redpacketui.utils.RPGroupMemberUtil;
 
 import java.util.List;
 
@@ -124,18 +127,27 @@ public class ConversationFragment extends LCIMConversationFragment {
 
   private void gotoGroupRedPacket() {
     final String fromNickname = LeanchatUser.getCurrentUser().getUsername();
-    final String fromAvatarUrl = LeanchatUser.getCurrentUserId();
-
+    final String fromAvatarUrl = LeanchatUser.getCurrentUser().getAvatarUrl();
     /**
      * 发送专属红包用的,获取群组成员
      */
-    RedPacketUtils.getInstance().getmGetUserInfoCallback().done(imConversation.getMembers(), new UserInfoCallback() {
+    RedPacketUtils.getInstance().initRpGroupMember(imConversation.getMembers(), new GetGroupMemberCallback() {
       @Override
-      public void getUserInfo(List<RPUserBean> rpuserlist) {
+      public void groupInfoSuccess(final List<RPUserBean> rpUserList) {
         /**
-         * 发专属红包,把群组成员信息传给红包SDK
+         * 获取群成员消息成功调用
          */
-        RedPacketUtils.getInstance().initRpGroupMember(rpuserlist);
+        RPGroupMemberUtil.getInstance().setGroupMemberListener(new NotifyGroupMemberCallback() {
+          @Override
+          public void getGroupMember(String s, GroupMemberCallback groupMemberCallback) {
+            groupMemberCallback.setGroupMember(rpUserList);
+          }
+        });
+      }
+
+      @Override
+      public void groupInfoError() {
+
       }
     });
 
@@ -182,6 +194,10 @@ public class ConversationFragment extends LCIMConversationFragment {
     }
   }
 
+  /**
+   * 发送红包之后设置红包消息的数据
+   * @param data
+   */
   private void processReadPack(Intent data) {
     if (data != null) {
       String greetings = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_GREETING);

@@ -4,7 +4,6 @@ import com.avos.avoscloud.im.v2.AVIMMessageCreator;
 import com.avos.avoscloud.im.v2.AVIMMessageField;
 import com.avos.avoscloud.im.v2.AVIMMessageType;
 import com.avos.avoscloud.im.v2.AVIMTypedMessage;
-import com.avoscloud.chat.redpacket.RedPacketUtils;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
 
 import cn.leancloud.chatkit.LCChatMessageInterface;
@@ -15,8 +14,8 @@ import cn.leancloud.chatkit.LCChatMessageInterface;
  */
 @AVIMMessageType(type = LCIMRedPcketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE)
 public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMessageInterface {
-
-  public LCIMRedPcketAckMessage() {}
+  public LCIMRedPcketAckMessage() {
+  }
 
   public static final Creator<LCIMRedPcketAckMessage> CREATOR = new AVIMMessageCreator<LCIMRedPcketAckMessage>(LCIMRedPcketAckMessage.class);
 
@@ -25,13 +24,13 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
   /**
    * 红包的发送者 id
    */
-  @AVIMMessageField(name = RedPacketUtils.EXTRA_RED_PACKET_SENDER_ID)
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_ID)
   private String senderId;
 
   /**
    * 红包的发送者 name
    */
-  @AVIMMessageField(name = RedPacketUtils.EXTRA_RED_PACKET_SENDER_NAME)
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_NAME)
   private String senderName;
 
   /**
@@ -49,8 +48,21 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_TYPE)
   private String redPacketType;
 
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_GREETING)
+  private String greeting;
+
   @Override
   public String getShorthand() {
+    String userId=LeanchatUser.getCurrentUserId();
+    if (userId.equals(senderId)&&userId.equals(recipientId)){
+      return "你领取了自己的红包";
+    }else if (userId.equals(senderId)&&!userId.equals(recipientId)){
+      return recipientName+"领取了你的红包";
+    }else if (!userId.equals(senderId)&&userId.equals(recipientId)){
+      return "你领取了"+senderName+"的红包";
+    }else if (!userId.equals(senderId)&&!userId.equals(recipientId)){
+      return greeting;
+    }
     return null;
   }
 
@@ -92,5 +104,13 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
 
   public void setRedPacketType(String redPacketType) {
     this.redPacketType = redPacketType;
+  }
+
+  public String getGreeting() {
+    return greeting;
+  }
+
+  public void setGreeting(String greeting) {
+    this.greeting = greeting;
   }
 }

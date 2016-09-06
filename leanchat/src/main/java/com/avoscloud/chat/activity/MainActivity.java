@@ -11,18 +11,19 @@ import android.widget.Button;
 import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVGeoPoint;
 import com.avos.avoscloud.SaveCallback;
-import com.avoscloud.chat.R;
 import com.avoscloud.chat.App;
+import com.avoscloud.chat.R;
 import com.avoscloud.chat.fragment.ConversationListFragment;
-import com.avoscloud.chat.service.PreferenceMap;
-import com.avoscloud.chat.service.UpdateService;
-import com.avoscloud.chat.friends.ContactFragment;
 import com.avoscloud.chat.fragment.DiscoverFragment;
 import com.avoscloud.chat.fragment.ProfileFragment;
-import com.avoscloud.chat.util.LogUtils;
-import com.avoscloud.chat.util.Utils;
+import com.avoscloud.chat.friends.ContactFragment;
 import com.avoscloud.chat.model.LeanchatUser;
+import com.avoscloud.chat.redpacket.RedPacketUtils;
+import com.avoscloud.chat.service.PreferenceMap;
+import com.avoscloud.chat.service.UpdateService;
+import com.avoscloud.chat.util.LogUtils;
 import com.avoscloud.chat.util.UserCacheUtils;
+import com.avoscloud.chat.util.Utils;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
@@ -56,6 +57,7 @@ public class MainActivity extends AVBaseActivity {
   ProfileFragment profileFragment;
   Button[] tabs;
   View recentTips, contactTips;
+  String mockUrl = "http://rpv2.yunzhanghu.com/api/sign?duid=" + LeanchatUser.getCurrentUserId();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,7 @@ public class MainActivity extends AVBaseActivity {
     setContentView(R.layout.main_activity);
     findView();
     init();
+    RedPacketUtils.getInstance().setRefreshSign(MainActivity.this,mockUrl);
 
     conversationBtn.performClick();
     initBaiduLocClient();

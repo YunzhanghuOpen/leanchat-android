@@ -1,10 +1,12 @@
 package com.avoscloud.chat.redpacket;
 
-import java.util.List;
+import com.yunzhanghu.redpacketsdk.bean.RPUserBean;
 
 /**
- * Created by hhx on 16/6/29.
+ * Created by hhx on 16/6/30.
  */
 public interface GetUserInfoCallback {
-  void done(List<String> ids, UserInfoCallback callback);
+  void userInfoSuccess(RPUserBean rpUser);
+
+  void userInfoError();
 }

@@ -9,7 +9,7 @@ import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.im.v2.AVIMMessageManager;
 import com.avoscloud.chat.friends.AddRequest;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
-import com.avoscloud.chat.model.LCIMRedPcketAckMessage;
+import com.avoscloud.chat.model.LCIMRedPacketAckMessage;
 import com.avoscloud.chat.model.LeanchatUser;
 import com.avoscloud.chat.model.UpdateInfo;
 import com.avoscloud.chat.service.PushManager;
@@ -45,7 +45,7 @@ public class App extends Application {
     AVOSCloud.setLastModifyEnabled(true);
 
     AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketMessage.class);
-    AVIMMessageManager.registerAVIMMessageType(LCIMRedPcketAckMessage.class);
+    AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketAckMessage.class);
     LCChatKit.getInstance().setProfileProvider(new LeanchatUserProvider());
     LCChatKit.getInstance().init(this, appId, appKey);
 

@@ -45,15 +45,27 @@ public class LCIMRedPacketAckMessage extends AVIMTypedMessage implements LCChatM
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_NAME)
   private String recipientName;
 
+  /**
+   * 红包的类型
+   */
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_TYPE)
   private String redPacketType;
 
+  /**
+   * 祝福语
+   */
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_GREETING)
   private String greeting;
 
+  /**
+   * 祝福语前缀(如LeanCloud红包)
+   */
   @AVIMMessageField(name = RPConstant.EXTRA_SPONSOR_NAME)
   private String sponsorName;
 
+  /**
+   * 是否是红包消息
+   */
   @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_IS_RED_PACKET_MESSAGE)
   private boolean isMoney;
 

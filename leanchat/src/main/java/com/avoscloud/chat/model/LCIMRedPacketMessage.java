@@ -12,10 +12,10 @@ import cn.leancloud.chatkit.LCChatMessageInterface;
  * Created by wli on 16/7/11.
  */
 
-@AVIMMessageType(type = LCIMRedPacketMessage.PACKMESSAGE_TYPE)
+@AVIMMessageType(type = LCIMRedPacketMessage.RED_PACKET_MESSAGE_TYPE)
 public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMessageInterface {
 
-  public static final int PACKMESSAGE_TYPE = 1001;
+  public static final int RED_PACKET_MESSAGE_TYPE = 3;
 
   public LCIMRedPacketMessage() {}
 
@@ -33,6 +33,15 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
 
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_ID)
   private String receiverId;
+
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_IS_RED_PACKET_MESSAGE)
+  private boolean isMoney;
+
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_NAME)
+  private String senderName;
+
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_ID)
+  private String senderId;
 
   public static final Creator<LCIMRedPacketMessage> CREATOR = new AVIMMessageCreator<LCIMRedPacketMessage>(LCIMRedPacketMessage.class);
 
@@ -79,5 +88,29 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
 
   public void setReceiverId(String receiverId) {
     this.receiverId = receiverId;
+  }
+
+  public boolean isMoney() {
+    return isMoney;
+  }
+
+  public void setMoney(boolean money) {
+    isMoney = money;
+  }
+
+  public String getSenderName() {
+    return senderName;
+  }
+
+  public void setSenderName(String senderName) {
+    this.senderName = senderName;
+  }
+
+  public String getSenderId() {
+    return senderId;
+  }
+
+  public void setSenderId(String senderId) {
+    this.senderId = senderId;
   }
 }

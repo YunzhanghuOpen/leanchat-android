@@ -205,6 +205,8 @@ public class ConversationFragment extends LCIMConversationFragment {
       String sponsorName = getResources().getString(R.string.leancloud_luckymoney);
       String redPacketType = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_TYPE);//群红包类型
       String specialReceiveId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_RECEIVER_ID);//专属红包接受者ID
+      String selfName = LeanchatUser.getCurrentUser().getUsername();
+      String selfID = LeanchatUser.getCurrentUserId();
 
       LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
       redPacketMessage.setGreeting(greetings);
@@ -212,6 +214,9 @@ public class ConversationFragment extends LCIMConversationFragment {
       redPacketMessage.setSponsorName(sponsorName);
       redPacketMessage.setRedPacketType(redPacketType);
       redPacketMessage.setReceiverId(specialReceiveId);
+      redPacketMessage.setMoney(true);
+      redPacketMessage.setSenderName(selfName);
+      redPacketMessage.setSenderId(selfID);
       sendMessage(redPacketMessage);
     }
   }

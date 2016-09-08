@@ -14,7 +14,7 @@ import com.avos.avoscloud.im.v2.AVIMMessage;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.event.RedPacketAckEvent;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
-import com.avoscloud.chat.model.LCIMRedPcketAckMessage;
+import com.avoscloud.chat.model.LCIMRedPacketAckMessage;
 import com.avoscloud.chat.model.LeanchatUser;
 import com.avoscloud.chat.redpacket.GetUserInfoCallback;
 import com.avoscloud.chat.redpacket.RedPacketUtils;
@@ -153,13 +153,15 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
           /**
            * 打开红包之后消息回执处理
            */
-          LCIMRedPcketAckMessage ackMessage = new LCIMRedPcketAckMessage();
+          LCIMRedPacketAckMessage ackMessage = new LCIMRedPacketAckMessage();
           ackMessage.setSenderId(senderId);
           ackMessage.setSenderName(senderNickname);
           ackMessage.setRecipientId(selfId);
           ackMessage.setRecipientName(selfName);
           ackMessage.setRedPacketType(message.getRedPacketType());
-          ackMessage.setGreeting("["+message.getSponsorName()+"]"+message.getGreeting());
+          ackMessage.setGreeting(message.getGreeting());
+          ackMessage.setSponsorName(message.getSponsorName());
+          ackMessage.setMoney(true);
           EventBus.getDefault().post(new RedPacketAckEvent(ackMessage));
         }
 

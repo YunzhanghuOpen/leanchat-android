@@ -12,14 +12,14 @@ import cn.leancloud.chatkit.LCChatMessageInterface;
  * Created by wli on 16/7/14.
  * 红包发送被别人接收后的 tip message
  */
-@AVIMMessageType(type = LCIMRedPcketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE)
-public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMessageInterface {
-  public LCIMRedPcketAckMessage() {
+@AVIMMessageType(type = LCIMRedPacketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE)
+public class LCIMRedPacketAckMessage extends AVIMTypedMessage implements LCChatMessageInterface {
+  public LCIMRedPacketAckMessage() {
   }
 
-  public static final Creator<LCIMRedPcketAckMessage> CREATOR = new AVIMMessageCreator<LCIMRedPcketAckMessage>(LCIMRedPcketAckMessage.class);
+  public static final Creator<LCIMRedPacketAckMessage> CREATOR = new AVIMMessageCreator<LCIMRedPacketAckMessage>(LCIMRedPacketAckMessage.class);
 
-  public static final int RED_PACKET_ACK_MESSAGE_TYPE = 1002;
+  public static final int RED_PACKET_ACK_MESSAGE_TYPE = 4;
 
   /**
    * 红包的发送者 id
@@ -36,13 +36,13 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
   /**
    * 红包的接收者 id
    */
-  @AVIMMessageField(name = "recipient_id")
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_ID)
   private String recipientId;
 
   /**
    * 红包的接收者 name
    */
-  @AVIMMessageField(name = "recipient_name")
+  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_NAME)
   private String recipientName;
 
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_TYPE)
@@ -50,6 +50,12 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
 
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_GREETING)
   private String greeting;
+
+  @AVIMMessageField(name = RPConstant.EXTRA_SPONSOR_NAME)
+  private String sponsorName;
+
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_IS_RED_PACKET_MESSAGE)
+  private boolean isMoney;
 
   @Override
   public String getShorthand() {
@@ -61,7 +67,7 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
     }else if (!userId.equals(senderId)&&userId.equals(recipientId)){
       return "你领取了"+senderName+"的红包";
     }else if (!userId.equals(senderId)&&!userId.equals(recipientId)){
-      return greeting;
+      return "["+sponsorName+"]"+greeting;
     }
     return null;
   }
@@ -112,5 +118,21 @@ public class LCIMRedPcketAckMessage extends AVIMTypedMessage implements LCChatMe
 
   public void setGreeting(String greeting) {
     this.greeting = greeting;
+  }
+
+  public String getSponsorName() {
+    return sponsorName;
+  }
+
+  public void setSponsorName(String sponsorName) {
+    this.sponsorName = sponsorName;
+  }
+
+  public boolean isMoney() {
+    return isMoney;
+  }
+
+  public void setMoney(boolean money) {
+    isMoney = money;
   }
 }

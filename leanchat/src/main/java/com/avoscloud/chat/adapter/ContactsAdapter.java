@@ -71,11 +71,13 @@ public class ContactsAdapter extends HeaderListAdapter<ContactItem> {
     Character lastCharcter = '#';
     Map<Character, Integer> map = new HashMap<>();
     for (int i = 0; i < list.size(); i++) {
-      Character curChar = Character.toLowerCase(list.get(i).sortContent.charAt(0));
-      if (!lastCharcter.equals(curChar)) {
-        map.put(curChar, i);
+      if (!TextUtils.isEmpty(list.get(i).sortContent)) {
+        Character curChar = Character.toLowerCase(list.get(i).sortContent.charAt(0));
+        if (!lastCharcter.equals(curChar)) {
+          map.put(curChar, i);
+        }
+        lastCharcter = curChar;
       }
-      lastCharcter = curChar;
     }
     return map;
   }

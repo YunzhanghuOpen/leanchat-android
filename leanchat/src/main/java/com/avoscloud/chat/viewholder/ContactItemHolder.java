@@ -1,6 +1,7 @@
 package com.avoscloud.chat.viewholder;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +58,11 @@ public class ContactItemHolder extends LCIMCommonViewHolder<ContactItem> {
   public void bindData(ContactItem memberItem) {
     contactItem = memberItem;
     alpha.setVisibility(memberItem.initialVisible ? View.VISIBLE : View.GONE);
-    alpha.setText(String.valueOf(Character.toUpperCase(memberItem.sortContent.charAt(0))));
+    if (!TextUtils.isEmpty(memberItem.sortContent)) {
+      alpha.setText(String.valueOf(Character.toUpperCase(memberItem.sortContent.charAt(0))));
+    } else {
+      alpha.setText("");
+    }
     Picasso.with(getContext()).load(memberItem.user.getAvatarUrl())
       .placeholder(R.drawable.lcim_default_avatar_icon).into(avatarView);
     nameView.setText(memberItem.user.getUsername());

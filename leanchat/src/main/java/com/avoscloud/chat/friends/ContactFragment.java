@@ -39,7 +39,7 @@ import de.greenrobot.event.EventBus;
 
 /**
  * 联系人列表
- *
+ * <p/>
  * TODO
  * 1、替换 Fragment 的 title
  * 2、优化 findFriends 代码，现在还是冗余
@@ -106,7 +106,7 @@ public class ContactFragment extends BaseFragment {
   }
 
   private void initHeaderView() {
-    msgTipsView = (ImageView)headerView.findViewById(R.id.iv_msg_tips);
+    msgTipsView = (ImageView) headerView.findViewById(R.id.iv_msg_tips);
     View newView = headerView.findViewById(R.id.layout_new);
     newView.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -161,23 +161,24 @@ public class ContactFragment extends BaseFragment {
       }
     });
   }
+
   public void showDeleteDialog(final String memberId) {
     new AlertDialog.Builder(ctx).setMessage(R.string.contact_deleteContact)
-        .setPositiveButton(R.string.common_sure, new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            final ProgressDialog dialog1 = showSpinnerDialog();
-            LeanchatUser.getCurrentUser().removeFriend(memberId, new SaveCallback() {
-              @Override
-              public void done(AVException e) {
-                dialog1.dismiss();
-                if (filterException(e)) {
-                  getMembers(true);
-                }
+      .setPositiveButton(R.string.common_sure, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+          final ProgressDialog dialog1 = showSpinnerDialog();
+          LeanchatUser.getCurrentUser().removeFriend(memberId, new SaveCallback() {
+            @Override
+            public void done(AVException e) {
+              dialog1.dismiss();
+              if (filterException(e)) {
+                getMembers(true);
               }
-            });
-          }
-        }).setNegativeButton(R.string.chat_common_cancel, null).show();
+            }
+          });
+        }
+      }).setNegativeButton(R.string.chat_common_cancel, null).show();
   }
 
   public void onEvent(ContactRefreshEvent event) {
@@ -208,7 +209,8 @@ public class ContactFragment extends BaseFragment {
     if (itemAdapter.getIndexMap().containsKey(targetChar)) {
       int index = itemAdapter.getIndexMap().get(targetChar);
       if (index > 0 && index < itemAdapter.getItemCount()) {
-        layoutManager.scrollToPositionWithOffset(index, 0);
+        // 此处 index + 1 是因为 ContactsAdapter 有 header
+        layoutManager.scrollToPositionWithOffset(index + 1, 0);
       }
     }
   }

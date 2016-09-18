@@ -1,7 +1,6 @@
 package com.avoscloud.chat.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.ViewGroup;
 
 import com.avos.avoscloud.im.v2.AVIMMessage;
@@ -12,7 +11,6 @@ import com.avoscloud.chat.viewholder.ChatItemRedPacketAckHolder;
 import com.avoscloud.chat.viewholder.ChatItemRedPacketEmptyHolder;
 import com.avoscloud.chat.viewholder.ChatItemRedPacketHolder;
 
-import cn.leancloud.chatkit.LCChatKit;
 import cn.leancloud.chatkit.adapter.LCIMChatAdapter;
 
 /**
@@ -54,14 +52,7 @@ public class ChatAdapter extends LCIMChatAdapter {
       if (typedMessage.getMessageType() == LCIMRedPacketMessage.RED_PACKET_MESSAGE_TYPE) {
         return isMe ? ITEM_RIGHT_TEXT_RED_PACKET : ITEM_LEFT_TEXT_RED_PACKET;
       } else if (typedMessage.getMessageType() == LCIMRedPacketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE) {
-        String selfId = LCChatKit.getInstance().getCurrentUserId();
-        LCIMRedPacketAckMessage ackMessage = (LCIMRedPacketAckMessage) typedMessage;
-        if (!TextUtils.isEmpty(ackMessage.getSenderId()) && !TextUtils.isEmpty(ackMessage.getRecipientId())) {
-          return ackMessage.getSenderId().equals(selfId) || ackMessage.getRecipientId().equals(selfId)
-            ? ITEM_TEXT_RED_PACKET_NOTIFY : ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER;
-        } else {
-          return ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER;
-        }
+//        return RedPacketUtils.getInstance().receiveRedPacketAckMsg((LCIMRedPacketAckMessage) typedMessage,ITEM_TEXT_RED_PACKET_NOTIFY,ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER);
       }
     }
     return super.getItemViewType(position);

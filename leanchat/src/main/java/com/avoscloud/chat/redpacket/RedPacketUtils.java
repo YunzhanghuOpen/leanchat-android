@@ -12,6 +12,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.avoscloud.chat.event.RedPacketAckEvent;
+import com.avoscloud.chat.model.LCIMRedPacketAckMessage;
+import com.avoscloud.chat.model.LCIMRedPacketMessage;
 import com.avoscloud.chat.model.LeanchatUser;
 import com.avoscloud.chat.util.UserCacheUtils;
 import com.yunzhanghu.redpacketsdk.RPRefreshSignListener;
@@ -28,6 +31,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.leancloud.chatkit.LCChatKit;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by ustc on 2016/5/31.
@@ -280,19 +286,17 @@ public class RedPacketUtils {
     mTokenData = new TokenData();
     mTokenData.authPartner = authPartner;
     mTokenData.appUserId = authUserId;
-    mTokenData.authTimestamp = authTimestamp;
+    mTokenData.timestamp = authTimestamp;
     mTokenData.authSign = authSign;
   }
 
   public TokenData getTokenData() {
     if (mTokenData==null){
       mTokenData=new TokenData();
-      mTokenData.authSign="A7890";
       mTokenData.appUserId=LeanchatUser.getCurrentUserId();
     }else {
       if (!LeanchatUser.getCurrentUserId().equals(mTokenData.appUserId)){//切换账号的时候
         mTokenData=new TokenData();
-        mTokenData.authSign="A7891";
         mTokenData.appUserId=LeanchatUser.getCurrentUserId();
       }
     }
@@ -302,7 +306,6 @@ public class RedPacketUtils {
   /**
    * 进入零钱页用
    *
-   * @param mContext
    */
   public void toChangeActivity(Context mContext,String userName,String userAvatar) {
     Intent intent = new Intent(mContext, RPChangeActivity.class);
@@ -314,4 +317,32 @@ public class RedPacketUtils {
     mContext.startActivity(intent);
   }
 
+  /**
+   * 打开红包之后发送回执消息
+   */
+  public void sendRedPacketAckMsg(String senderId, String senderNickname, String selfId, String selfName, LCIMRedPacketMessage message) {
+    LCIMRedPacketAckMessage ackMessage = new LCIMRedPacketAckMessage();
+    ackMessage.setSenderId(senderId);
+    ackMessage.setSenderName(senderNickname);
+    ackMessage.setRecipientId(selfId);
+    ackMessage.setRecipientName(selfName);
+    ackMessage.setRedPacketType(message.getRedPacketType());
+    ackMessage.setGreeting(message.getGreeting());
+    ackMessage.setSponsorName(message.getSponsorName());
+    ackMessage.setMoney(true);
+    EventBus.getDefault().post(new RedPacketAckEvent(ackMessage));
+  }
+
+  /**
+   * 接收回执消息
+   */
+  public int receiveRedPacketAckMsg(LCIMRedPacketAckMessage typedMessage,int ITEM_TEXT_RED_PACKET_NOTIFY,int ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER) {
+    String selfId = LCChatKit.getInstance().getCurrentUserId();
+    if (!TextUtils.isEmpty(typedMessage.getSenderId()) && !TextUtils.isEmpty(typedMessage.getRecipientId())) {
+      return typedMessage.getSenderId().equals(selfId) || typedMessage.getRecipientId().equals(selfId)
+              ? ITEM_TEXT_RED_PACKET_NOTIFY : ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER;
+    } else {
+      return ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER;
+    }
+  }
 }

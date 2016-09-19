@@ -39,7 +39,7 @@ dependencies {
     compile files('libs/glide-3.6.1.jar')
     compile files('libs/volley-1.0.19.jar')
 
-    compile ('cn.leancloud.android:chatkit:1.0.2')
+    compile ('cn.leancloud.android:chatkit:1.0.+')
     compile project(':redpacketlibrary-aar')
 
     compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'

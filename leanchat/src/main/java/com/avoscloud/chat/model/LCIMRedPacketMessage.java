@@ -23,7 +23,7 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
    * 红包id
    */
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_ID)
-  private String readPacketId;
+  private String redPacketId;
 
   /**
    * 红包祝福语
@@ -74,12 +74,12 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
     return "["+sponsorName+"]" + greeting;
   }
 
-  public String getReadPacketId() {
-    return readPacketId;
+  public String getRedPacketId() {
+    return redPacketId;
   }
 
-  public void setReadPacketId(String readPacketId) {
-    this.readPacketId = readPacketId;
+  public void setRedPacketId(String redPacketId) {
+    this.redPacketId = redPacketId;
   }
 
   public String getSponsorName() {

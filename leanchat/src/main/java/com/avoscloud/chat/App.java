@@ -17,6 +17,7 @@ import com.avoscloud.chat.util.LeanchatUserProvider;
 import com.avoscloud.chat.util.Utils;
 import com.baidu.mapapi.SDKInitializer;
 import com.yunzhanghu.redpacketsdk.RedPacket;
+import com.yunzhanghu.redpacketsdk.constant.RPConstant;
 
 import cn.leancloud.chatkit.LCChatKit;
 
@@ -50,7 +51,7 @@ public class App extends Application {
     LCChatKit.getInstance().init(this, appId, appKey);
 
     // 初始化红包操作
-    RedPacket.getInstance().initContext(ctx);
+    RedPacket.getInstance().initContext(ctx, RPConstant.AUTH_METHOD_SIGN);
     //控制红包SDK中Log输出
     RedPacket.getInstance().setDebugMode(false);
 

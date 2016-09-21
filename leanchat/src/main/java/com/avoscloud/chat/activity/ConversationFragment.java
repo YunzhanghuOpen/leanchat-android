@@ -201,7 +201,7 @@ public class ConversationFragment extends LCIMConversationFragment {
   private void processReadPack(Intent data) {
     if (data != null) {
       String greetings = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_GREETING);
-      String moneyID = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_ID);
+      String redPacketId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_ID);
       String sponsorName = getResources().getString(R.string.leancloud_luckymoney);
       String redPacketType = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_TYPE);//群红包类型
       String specialReceiveId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_RECEIVER_ID);//专属红包接受者ID
@@ -210,7 +210,7 @@ public class ConversationFragment extends LCIMConversationFragment {
 
       LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
       redPacketMessage.setGreeting(greetings);
-      redPacketMessage.setReadPacketId(moneyID);
+      redPacketMessage.setRedPacketId(redPacketId);
       redPacketMessage.setSponsorName(sponsorName);
       redPacketMessage.setRedPacketType(redPacketType);
       redPacketMessage.setReceiverId(specialReceiveId);

@@ -131,7 +131,7 @@
 * 在需要添加零钱的页面调用下面的方法
 
 ```java
-    RPChangeActivity（零钱页面），跳转到零钱页面需要用户头像和用户名。具体的形式在RedPacketUtils的toChangeActivity方法中有展示。
+    RPChangeActivity（零钱页面），跳转到零钱页面需要用户头像(userAcatar)和用户名(userName)。具体的形式在RedPacketUtils的toChangeActivity方法中有展示。
       
    public void toChangeActivity(Context mContext,String userName,String userAvatar) {               
       Intent intent = new Intent(mContext, RPChangeActivity.class);  
@@ -239,7 +239,7 @@
     private void processReadPack(Intent data) {
       if (data != null) {
         String greetings = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_GREETING);
-        String moneyID = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_ID);
+        String redPacketId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_ID);
         String sponsorName = getResources().getString(R.string.leancloud_luckymoney);
         // 群红包类型
         String redPacketType = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_TYPE);
@@ -247,7 +247,7 @@
         String revId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_RECEIVER_ID);
         LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
         redPacketMessage.setGreeting(greetings);
-        redPacketMessage.setReadPacketId(moneyID);
+        redPacketMessage.setReadPacketId(redPacketId);
         redPacketMessage.setSponsorName(sponsorName);
         redPacketMessage.setRedPacketType(redPacketType);
         redPacketMessage.setReceiverId(revId);
@@ -262,7 +262,7 @@
 
 ```java
 
-打开红包需要调用RPOpenPacketUtil.getInstance().openRedPacket()方法，需要传的参数为用户名，头像，是发送者还是接收者，是单聊还是群聊；要是专属红包需要再多加3个字段，接收者的用户名和头像，以及发送者的id。
+打开红包需要调用RPOpenPacketUtil.getInstance().openRedPacket()方法，需要传的参数为用户名(selfName)，头像(selfAvatar)，是发送者还是接收者(moneyMsgDirect)，是单聊还是群聊(chatType)；是专属红包需要再多加3个字段，接收者的用户名(specialNickname)和头像(specialAvatarUrl)，以及发送者的id(toUserId)。
 实例如下：
 
    /**
@@ -283,11 +283,11 @@
     } else {
       moneyMsgDirect = RedPacketUtils.MESSAGE_DIRECT_RECEIVE;
     }
-    int chatType = 1;
-    if (!TextUtils.isEmpty(message.getRedPacketType())){
-      chatType = 2;
-    }else {
-      chatType = 1;
+    int chatType;
+    if (!TextUtils.isEmpty(message.getRedPacketType())) {
+      chatType = RPConstant.CHATTYPE_GROUP;
+    } else {
+      chatType = RPConstant.CHATTYPE_SINGLE;
     }
 
     final RedPacketInfo redPacketInfo = RedPacketUtils.initRedPacketInfo_received(
@@ -307,13 +307,7 @@
         @Override
         public void onSuccess(String senderId, String senderNickname) {
         
-          LCIMRedPcketAckMessage ackMessage = new LCIMRedPcketAckMessage();
-          ackMessage.setSenderId(senderId);
-          ackMessage.setSenderName(senderNickname);
-          ackMessage.setRecipientId(selfId);
-          ackMessage.setRecipientName(selfName);
-          ackMessage.setRedPacketType(message.getRedPacketType());
-          EventBus.getDefault().post(new RedPacketAckEvent(ackMessage));
+          RedPacketUtils.getInstance().sendRedPacketAckMsg(senderId, senderNickname,         selfId, selfName, message);           
         }
 
         @Override
@@ -406,37 +400,23 @@
 
 ```java
    /**
-   * 判断是什么红包类型的消息
-   * @param position
-   * @return
+   * 判断是什么消息类型
    */
+
   @Override
-    public int getItemViewType(int position) {
-      AVIMMessage message = messageList.get(position);
-      if (null != message && message instanceof AVIMTypedMessage) {
-        AVIMTypedMessage typedMessage = (AVIMTypedMessage) message;
-        boolean isMe = fromMe(typedMessage);
-        if (typedMessage.getMessageType() ==   
-            LCIMRedPacketMessage.RED_PACKET_MESSAGE_TYPE) {
-          return isMe ? ITEM_RIGHT_TEXT_RED_PACKET :  
-                        ITEM_LEFT_TEXT_RED_PACKET;
-        } else if (typedMessage.getMessageType() ==   
-            LCIMRedPacketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE) {
-          String selfId = LCChatKit.getInstance().getCurrentUserId();
-          LCIMRedPacketAckMessage ackMessage = (LCIMRedPacketAckMessage)typedMessage;
-          if (!TextUtils.isEmpty(ackMessage.getSenderId()) &&  
-              !TextUtils.isEmpty(ackMessage.getRecipientId())) {
-            return ackMessage.getSenderId().equals(selfId) ||  
-                   ackMessage.getRecipientId().equals(selfId)?
-                     ITEM_TEXT_RED_PACKET_NOTIFY :               
-                     ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER;
-          } else {
-            return ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER;
-          }
-        }
+  public int getItemViewType(int position) {
+    AVIMMessage message = messageList.get(position);
+    if (null != message && message instanceof AVIMTypedMessage) {
+      AVIMTypedMessage typedMessage = (AVIMTypedMessage) message;
+      boolean isMe = fromMe(typedMessage);
+      if (typedMessage.getMessageType() == LCIMRedPacketMessage.RED_PACKET_MESSAGE_TYPE) {
+        return isMe ? ITEM_RIGHT_TEXT_RED_PACKET : ITEM_LEFT_TEXT_RED_PACKET;
+      } else if (typedMessage.getMessageType() ==       LCIMRedPacketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE) {
+       return      RedPacketUtils.getInstance().receiveRedPacketAckMsg((LCIMRedPacketAckMessage) typedMessage,ITEM_TEXT_RED_PACKET_NOTIFY,ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER);
       }
-      return super.getItemViewType(position);
-    }    
+    }
+    return super.getItemViewType(position);
+  }
 ```
 
 

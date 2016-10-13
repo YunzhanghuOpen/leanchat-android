@@ -266,8 +266,8 @@ public class ConversationFragment extends LCIMConversationFragment {
   @Override
   public void setConversation(AVIMConversation conversation) {
     super.setConversation(conversation);
-    if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Single) {
-      addTransferView();
-    }
+//    if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Single) {//添加转账按钮
+//      addTransferView();
+//    }
   }
 }

@@ -10,6 +10,7 @@ import com.avos.avoscloud.im.v2.AVIMMessageManager;
 import com.avoscloud.chat.friends.AddRequest;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
 import com.avoscloud.chat.model.LCIMRedPacketAckMessage;
+import com.avoscloud.chat.model.LCIMTransferMessage;
 import com.avoscloud.chat.model.LeanchatUser;
 import com.avoscloud.chat.model.UpdateInfo;
 import com.avoscloud.chat.service.PushManager;
@@ -47,6 +48,7 @@ public class App extends Application {
 
     AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketMessage.class);
     AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketAckMessage.class);
+    AVIMMessageManager.registerAVIMMessageType(LCIMTransferMessage.class);
     LCChatKit.getInstance().setProfileProvider(new LeanchatUserProvider());
     LCChatKit.getInstance().init(this, appId, appKey);
 

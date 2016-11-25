@@ -167,6 +167,20 @@
             android:exported="false"
             android:screenOrientation="behind"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <!-- 转账页面 -->
+        <activity
+            android:name="com.yunzhanghu.redpacketui.ui.activity.RPTransferActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide"
+            android:windowSoftInputMode="adjustPan|stateVisible"
+            />
+        <!-- 转账详情页面 -->
+        <activity
+            android:name="com.yunzhanghu.redpacketui.ui.activity.RPTransferDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide"
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            />
 
         <service
             android:name="com.baidu.location.f"

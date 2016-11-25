@@ -19,7 +19,7 @@ import com.avoscloud.chat.redpacket.RedPacketUtils;
 import com.yunzhanghu.redpacketsdk.bean.RPUserBean;
 import com.yunzhanghu.redpacketsdk.bean.RedPacketInfo;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
-import com.yunzhanghu.redpacketui.utils.RPOpenPacketUtil;
+import com.yunzhanghu.redpacketui.utils.RPRedPacketUtil;
 
 import cn.leancloud.chatkit.viewholder.LCIMChatItemHolder;
 
@@ -141,12 +141,12 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
       redPacketInfo.specialAvatarUrl = rpUserBean.userAvatar;
       redPacketInfo.toUserId = selfId;
     }
-    RPOpenPacketUtil.getInstance().openRedPacket(redPacketInfo,
+    RPRedPacketUtil.getInstance().openRedPacket(redPacketInfo,
             RedPacketUtils.getInstance().getTokenData(),
             (FragmentActivity) context,
-            new RPOpenPacketUtil.RPOpenPacketCallBack() {
+            new RPRedPacketUtil.RPOpenPacketCallback() {
               @Override
-              public void onSuccess(String senderId, String senderNickname,String myAmount) {
+              public void onSuccess(String senderId, String senderNickname, String myAmount) {//因为ios还不能处理领红包之后的回调消息
 //                RedPacketUtils.getInstance().sendRedPacketAckMsg(senderId, senderNickname, selfId, selfName, message);
               }
 

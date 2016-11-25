@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
@@ -28,11 +27,11 @@ import com.avoscloud.chat.model.LeanchatUser;
 import com.avoscloud.chat.redpacket.GetGroupMemberCallback;
 import com.avoscloud.chat.redpacket.RedPacketUtils;
 import com.avoscloud.chat.util.ConversationUtils;
+import com.yunzhanghu.redpacketsdk.RPGroupMemberListener;
+import com.yunzhanghu.redpacketsdk.RPValueCallback;
+import com.yunzhanghu.redpacketsdk.RedPacket;
 import com.yunzhanghu.redpacketsdk.bean.RPUserBean;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
-import com.yunzhanghu.redpacketui.callback.GroupMemberCallback;
-import com.yunzhanghu.redpacketui.callback.NotifyGroupMemberCallback;
-import com.yunzhanghu.redpacketui.utils.RPGroupMemberUtil;
 
 import java.util.List;
 
@@ -163,10 +162,10 @@ public class ConversationFragment extends LCIMConversationFragment {
         /**
          * 获取群成员消息成功调用
          */
-        RPGroupMemberUtil.getInstance().setGroupMemberListener(new NotifyGroupMemberCallback() {
+        RedPacket.getInstance().setRPGroupMemberListener(new RPGroupMemberListener() {
           @Override
-          public void getGroupMember(String s, GroupMemberCallback groupMemberCallback) {
-            groupMemberCallback.setGroupMember(rpUserList);
+          public void getGroupMember(String s, RPValueCallback<List<RPUserBean>> rpValueCallback) {
+            rpValueCallback.onSuccess(rpUserList);
           }
         });
       }

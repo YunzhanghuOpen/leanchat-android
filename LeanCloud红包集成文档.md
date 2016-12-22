@@ -36,6 +36,8 @@
 
   **注意: redpacketlibrary-aar只支持AndroidStudio**。
 
+  **注意: 拆红包添加音效，需要在assets中引入open_packet_sound.mp3(文件名必须为此名，暂时支持mp3和wav格式)**。
+
 ## 3. 集成步骤
 
 ###3.1 添加对红包工程的依赖
@@ -98,6 +100,18 @@
             android:exported="false"
             android:screenOrientation="behind"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+     <!-- 转账页面 -->
+     <activity
+            android:name="com.yunzhanghu.redpacketui.ui.activity.RPTransferActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide"
+            android:windowSoftInputMode="adjustPan|stateVisible"/>
+      <!-- 转账详情页面 -->
+      <activity
+            android:name="com.yunzhanghu.redpacketui.ui.activity.RPTransferDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide"
+            android:windowSoftInputMode="adjustPan|stateHidden"/>
     <!--红包相关界面 end-->
 ```
 ### 3.3 初始化红包上下文
@@ -114,6 +128,10 @@
         RedPacket.getInstance().initContext(ctx);
         // 控制红包SDK中Log打印
         RedPacket.getInstance().setDebugMode(true);
+      	// 注册红包相关消息
+        AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketMessage.class);
+        AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketAckMessage.class);
+        AVIMMessageManager.registerAVIMMessageType(LCIMTransferMessage.class);
     }
 ```
 ### 3.4 初始化红包Token和用户信息
@@ -124,6 +142,8 @@
     import com.yunzhanghu.redpacketui.RedPacketUtil;    
 
     RedPacketUtils.getInstance().setRefreshSign(MainActivity.this,mockUrl);
+
+    注意:当商户接的时候，需要自己开发该接口，接口格式可以去官网查看(yunzhanghu.com)；Demo里给的是测试接口
 ```
 
 ### 3.5 ProfileFragment添加零钱页的入口

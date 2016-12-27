@@ -85,7 +85,7 @@ public class App extends Application {
       }
     });
     //控制红包SDK中Log输出
-    RedPacket.getInstance().setDebugMode(true);
+    RedPacket.getInstance().setDebugMode(false);
 
     PushManager.getInstance().init(ctx);
     AVOSCloud.setDebugLogEnabled(debug);

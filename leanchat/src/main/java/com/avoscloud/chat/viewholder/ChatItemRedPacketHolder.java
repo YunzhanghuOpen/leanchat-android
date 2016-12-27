@@ -108,10 +108,7 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
             (FragmentActivity) context,
             new RPRedPacketUtil.RPOpenPacketCallback() {
               @Override
-              public void onSuccess(String senderId, String senderNickname, String myAmount) {//因为ios还不能处理领红包之后的回调消息
-//                String selfName = LeanchatUser.getCurrentUser().getUsername();
-//                String selfId = LeanchatUser.getCurrentUserId();
-//                RedPacketUtil.getInstance().sendRedPacketAckMsg(senderId, senderNickname, selfId, selfName, message);
+              public void onSuccess(String senderId, String senderNickname, String myAmount) {
               }
 
               @Override

@@ -1,9 +1,9 @@
 # LeanCloud红包集成文档
 
 
-## 1. redpacketlibrary-aar简介
+## 1. 红包库简介
 
-**redpacketlibrary-aar**，在LeanCloud **SDK** 的基础上提供了收发红包和零钱页的功能。
+**红包库使用远程依赖的方式**，在LeanCloud **SDK** 的基础上提供了收发红包和零钱页的功能。
 
 ## 2. 红包相关文件说明
 
@@ -12,6 +12,7 @@
   * alipaySdk-20160516支付宝支付
   * glide-3.6.1图片加载库
   * volley-1.0.19请求框架
+  * libammsdk微信支付
 
 * res ：包含了红包SDK和聊天页面中的资源文件。（红包SDK相关以lc_开头）
 
@@ -19,7 +20,6 @@
 
   * GetSignInfoCallback 获取签名接口回调
   * GetGroupMemberCallback 获取群里面的人数（app开发者需要自己处理）的接口回调。
-  * GetUserInfoCallback 根据用户id获取用户信息接口回调（打开专属红包所需，回调可以根据需要自己处理）
   * RedPacketUtils 发送打开红包相关的工具类
 
 * message ：
@@ -47,13 +47,22 @@
     compile files('libs/alipaySdk-20160516.jar')
     compile files('libs/glide-3.6.1.jar')
     compile files('libs/volley-1.0.19.jar')
-    compile project(':redpacketlibrary-aar')// 红包sdk
+    compile files('libs/libammsdk.jar')
+    compile('com.yunzhanghu:redpacket:3.4.0@aar')
+    allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://raw.githubusercontent.com/YunzhanghuOpen/redpacket-maven-repo/dev/snapshots"
+        }
+    }
+}
 ```
 
 * leanchat-android的setting.gradle中
 
 ```java
-    include ':leanchat', ':redpacketlibrary-aar'
+    include ':leanchat'
 ```
 ### 3.2 leanchat-android清单文件中注册红包相关组件
 
@@ -112,6 +121,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="adjustPan|stateHidden"/>
+       <!-- 微信支付回调页面 -->
+       <activity
+            android:name="com.avoscloud.chat.wxapi.WXPayEntryActivity"
+            android:exported="true"
+            android:launchMode="singleTop"/>
     <!--红包相关界面 end-->
 ```
 ### 3.3 初始化红包上下文
@@ -125,7 +139,33 @@
     @Override
     public void onCreate() {
         // 初始化红包操作
-        RedPacket.getInstance().initContext(ctx);
+        RedPacket.getInstance().initRedPacket(ctx,RPConstant.AUTH_METHOD_SIGN,  new                                                                             
+                                              RPInitRedPacketCallback() {       
+      @Override
+      public void initTokenData(final RPValueCallback<TokenData> rpValueCallback) {
+           RedPacketUtils.getInstance().getRedPacketSign(ctx, new                                          
+                                                         GetSignInfoCallback() {
+          @Override
+          public void signInfoSuccess(TokenData tokenData) {
+            rpValueCallback.onSuccess(tokenData);
+          }
+
+          @Override
+          public void signInfoError(String errorMsg) {
+          }
+        });
+      }
+
+      @Override
+      public RedPacketInfo initCurrentUserSync() {
+        //这里需要同步设置当前用户id、昵称和头像url
+        RedPacketInfo redPacketInfo = new RedPacketInfo();
+        redPacketInfo.fromUserId = LeanchatUser.getCurrentUserId();
+        redPacketInfo.fromAvatarUrl = LeanchatUser.getCurrentUser().getAvatarUrl();
+        redPacketInfo.fromNickName = LeanchatUser.getCurrentUser().getUsername();
+        return redPacketInfo;
+      }
+    });
         // 控制红包SDK中Log打印
         RedPacket.getInstance().setDebugMode(true);
       	// 注册红包相关消息
@@ -134,34 +174,16 @@
         AVIMMessageManager.registerAVIMMessageType(LCIMTransferMessage.class);
     }
 ```
-### 3.4 初始化红包Token和用户信息
 
-* MainActivity获取个人信息成功后请求签名（同步群组信息成功之后）并初始化红包token
-
-```java
-    import com.yunzhanghu.redpacketui.RedPacketUtil;    
-
-    RedPacketUtils.getInstance().setRefreshSign(MainActivity.this,mockUrl);
-
-    注意:当商户接的时候，需要自己开发该接口，接口格式可以去官网查看(yunzhanghu.com)；Demo里给的是测试接口
-```
-
-### 3.5 ProfileFragment添加零钱页的入口
+### 3.4 ProfileFragment添加零钱页的入口
 
 * 在需要添加零钱的页面调用下面的方法
 
 ```java
-    RPChangeActivity（零钱页面），跳转到零钱页面需要用户头像(userAcatar)和用户名(userName)。具体的形式在RedPacketUtils的toChangeActivity方法中有展示。
+    RPChangeActivity（零钱页面）
       
-   public void toChangeActivity(Context mContext,String userName,String userAvatar) {               
-      Intent intent = new Intent(mContext, RPChangeActivity.class);  
-      RedPacketInfo redPacketInfo = new RedPacketInfo();
-      redPacketInfo.fromNickName = userName;
-      redPacketInfo.fromAvatarUrl = userAvatar;
-      intent.putExtra(RPConstant.EXTRA_RED_PACKET_INFO, redPacketInfo);
-      intent.putExtra(RPConstant.EXTRA_TOKEN_DATA, getTokenData());
-      mContext.startActivity(intent);
-    }
+    RPRedPacketUtil.getInstance().startChangeActivity(getActivity());
+
 ```
 
 ## 4. 关于群、单聊红包的释义
@@ -173,107 +195,80 @@
 * 添加单聊红包入口
 
 ```java
-单聊发红包页面RPRedPacketActivity（chatType为1），需要参数有发送人头像，发送人的用户名，单聊的chatType值，接收者id。
+单聊发红包页面RPRedPacketActivity（itemType为RPConstant.RP_ITEM_TYPE_SINGLE，群聊为RPConstant.RP_ITEM_TYPE_GROUP），需要参数有上下文，imConversation，itemType，接收者id（单聊传接收者id,群聊传群id）。
 实例如下所示
 
-    private void gotoSingleRedPacket(final String peerId) {
-        int chatType = RPConstant.CHATTYPE_SINGLE;
-        int membersNum = 0;
-        String tpGroupId = "";
-        String selfName = LeanchatUser.getCurrentUser().getUsername();
-        String selfAvatar = LeanchatUser.getCurrentUser().getAvatarUrl();
-        RedPacketUtils.selectRedPacket(ConversationFragment.this, peerId,  
-        selfName, selfAvatar, chatType, tpGroupId, membersNum,  
-        REQUEST_CODE_SEND_RED_PACKET);
-    }     
-```
+    public void startRedPacket(final FragmentActivity activity, final AVIMConversation 
+                               imConversation, final int itemType, final String toUserId, final 
+                               RPSendPacketCallback callback) {
+    final RedPacketInfo redPacketInfo = new RedPacketInfo();
+    if (itemType == RPConstant.RP_ITEM_TYPE_GROUP) {
+      /**
+       * 发送专属红包用的,获取群组成员
+       */
+      RedPacket.getInstance().setRPGroupMemberListener(new RPGroupMemberListener() {
+        @Override
+        public void getGroupMember(String s, final RPValueCallback<List<RPUserBean>> 
+                                   rpValueCallback) {
+          initRpGroupMember(imConversation.getMembers(), new GetGroupMemberCallback() {
+            @Override
+            public void groupInfoSuccess(List<RPUserBean> rpUserList) {
+              rpValueCallback.onSuccess(rpUserList);
+            }
 
-* 添加群聊红包入口
+            @Override
+            public void groupInfoError() {
 
-```java
-群聊发红包页面为RPRedPacketActivity（chatType为2），需要参数有发送人头像，发送人的用户名，chatType值，群id,群成员数量。
-实例如下所示：
-
-    private void gotoGroupRedPacket() {
-      final String fromNickname =  
-                   LeanchatUser.getCurrentUser().getUsername();
-      final String fromAvatarUrl =        
-                   LeanchatUser.getCurrentUser().getAvatarUrl();
-      final String toUserId = LeanchatUser.getCurrentUserId();
-    /**
-     * 发送专属红包用的,获取群组成员
-     */
-    RedPacketUtils.getInstance().initRpGroupMember(imConversation.getMembers(), new                                              
-                                                   GetGroupMemberCallback() {
-       @Override
-       public void groupInfoSuccess(final List<RPUserBean> rpUserList) {
-        /**
-         * 获取群成员消息成功调用
-         */
-         RPGroupMemberUtil.getInstance().setGroupMemberListener(new                                                                                                                   
-                                                       NotifyGroupMemberCallback() {
-           @Override
-           public void getGroupMember(String s, GroupMemberCallback callback) {
-              callback.setGroupMember(rpUserList);
             }
           });
         }
-
-        @Override
-        public void groupInfoError() {
-
-        }
       });
-    imConversation.getMemberCount(new AVIMConversationMemberCountCallback() {
+      imConversation.getMemberCount(new AVIMConversationMemberCountCallback() {
         @Override
         public void done(Integer integer, AVIMException e) {
-          int chatType = RPConstant.CHATTYPE_GROUP;
-          String tpGroupId = imConversation.getConversationId();
-          int membersNum = integer;
-          RedPacketUtils.selectRedPacket(ConversationFragment.this,       
-          toUserId, fromNickname, fromAvatarUrl, chatType, tpGroupId,    
-          membersNum, REQUEST_CODE_SEND_RED_PACKET);
+          redPacketInfo.toGroupId = imConversation.getConversationId();
+          redPacketInfo.groupMemberCount = integer;
+          RPRedPacketUtil.getInstance().startRedPacket(activity, itemType, redPacketInfo, 
+                                                       callback);
         }
       });
-    }         
+    } else {
+      redPacketInfo.toUserId = toUserId;
+      LeanchatUser leanchatUser = UserCacheUtils.getCachedUser(toUserId);
+      if (leanchatUser != null) {
+        redPacketInfo.toNickName = TextUtils.isEmpty(leanchatUser.getUsername()) ? "none" : 
+        leanchatUser.getUsername();
+        redPacketInfo.toAvatarUrl = TextUtils.isEmpty(leanchatUser.getAvatarUrl()) ? "" : 
+        leanchatUser.getAvatarUrl();
+      }
+      RPRedPacketUtil.getInstance().startRedPacket(activity, itemType, redPacketInfo, callback);
+    }
+  }     
 ```
+
 * 发送红包之后数据展示
 
 ```java
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-      super.onActivityResult(requestCode, resultCode, data);
-      if (Activity.RESULT_OK == resultCode) {
-        switch (requestCode) {
-          case REQUEST_CODE_SEND_RED_PACKET:
-            processReadPack(data);
-            break；
-        }
-      }
-    }
+  /**
+   * 红包消息的数据
+   */
+  public LCIMRedPacketMessage createRPMessage(Context context, RedPacketInfo redPacketInfo) {
+    String selfName = LeanchatUser.getCurrentUser().getUsername();
+    String selfID = LeanchatUser.getCurrentUserId();
 
-    /**
-     * 发送红包之后设置红包消息的数据
-     * @param data
-     */
-    private void processReadPack(Intent data) {
-      if (data != null) {
-        String greetings = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_GREETING);
-        String redPacketId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_ID);
-        String sponsorName = getResources().getString(R.string.leancloud_luckymoney);
-        // 群红包类型
-        String redPacketType = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_TYPE);
-        // 专属红包接收者ID
-        String revId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_RECEIVER_ID);
-        LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
-        redPacketMessage.setGreeting(greetings);
-        redPacketMessage.setReadPacketId(redPacketId);
-        redPacketMessage.setSponsorName(sponsorName);
-        redPacketMessage.setRedPacketType(redPacketType);
-        redPacketMessage.setReceiverId(revId);
-        sendMessage(redPacketMessage);
-      }
-    }    
+    LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
+    redPacketMessage.setGreeting(redPacketInfo.redPacketGreeting);
+    redPacketMessage.setRedPacketId(redPacketInfo.redPacketId);
+    redPacketMessage.setSponsorName(context.getResources().
+                                    getString(R.string.leancloud_luckymoney));
+    redPacketMessage.setRedPacketType(redPacketInfo.redPacketType);
+    redPacketMessage.setReceiverId(redPacketInfo.toUserId);
+    redPacketMessage.setMoney(true);
+    redPacketMessage.setSenderName(selfName);
+    redPacketMessage.setSenderId(selfID);
+    return redPacketMessage;
+  }
+       
 ```
 
 ### 4.2 ChatItemRedPacketHolder中打开红包消息和回执消息处理
@@ -285,24 +280,10 @@
 打开红包需要调用RPOpenPacketUtil.getInstance().openRedPacket()方法，需要传的参数为用户名(selfName)，头像(selfAvatar)，是发送者还是接收者(moneyMsgDirect)，是单聊还是群聊(chatType)；是专属红包需要再多加3个字段，接收者的用户名(specialNickname)和头像(specialAvatarUrl)，以及发送者的id(toUserId)。
 实例如下：
 
-   /**
-  * Method name:openRedPacket
-  * Describe: 打开红包
-  * Remarks：
-  */
-  private void openRedPacket(final Context context, final LCIMRedPacketMessage message) {
+   private void openRedPacket(final Context context, final LCIMRedPacketMessage message) {
     final ProgressDialog progressDialog = new ProgressDialog(context);
     progressDialog.setCanceledOnTouchOutside(false);
 
-    final String selfName = LeanchatUser.getCurrentUser().getUsername();
-    String selfAvatar = LeanchatUser.getCurrentUser().getAvatarUrl();
-    final String selfId = LeanchatUser.getCurrentUserId();
-    String moneyMsgDirect; /*判断发送还是接收*/
-    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
-      moneyMsgDirect = RedPacketUtils.MESSAGE_DIRECT_SEND;
-    } else {
-      moneyMsgDirect = RedPacketUtils.MESSAGE_DIRECT_RECEIVE;
-    }
     int chatType;
     if (!TextUtils.isEmpty(message.getRedPacketType())) {
       chatType = RPConstant.CHATTYPE_GROUP;
@@ -310,42 +291,76 @@
       chatType = RPConstant.CHATTYPE_SINGLE;
     }
 
-    final RedPacketInfo redPacketInfo = RedPacketUtils.initRedPacketInfo_received(
-      selfName, selfAvatar, moneyMsgDirect, chatType, message.getReadPacketId());
-    if (null != rpUserBean) {
+    RPRedPacketUtil.getInstance().openRedPacket(wrapperRedPacketInfo(chatType, message),
+            (FragmentActivity) context,
+            new RPRedPacketUtil.RPOpenPacketCallback() {
+              @Override
+              public void onSuccess(String senderId, String senderNickname, String myAmount) {
+                 String selfName = LeanchatUser.getCurrentUser().getUsername();
+                 String selfId = LeanchatUser.getCurrentUserId();
+                 RedPacketUtil.getInstance().sendRedPacketAckMsg(senderId, senderNickname, selfId,     
+                                                                 selfName, message);
+              }
+
+              @Override
+              public void showLoading() {
+                progressDialog.show();
+              }
+
+              @Override
+              public void hideLoading() {
+                progressDialog.dismiss();
+              }
+
+              @Override
+              public void onError(String code, String message) { /*错误处理*/
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+              }
+            });
+  }
+
+  /**
+   * 封装拆红包所需参数
+   *
+   * @param chatType 聊天类型
+   * @param message  EMMessage
+   * @return RedPacketInfo
+   */
+  private RedPacketInfo wrapperRedPacketInfo(int chatType, LCIMRedPacketMessage message) {
+    String redPacketId = message.getRedPacketId();
+    String redPacketType = message.getRedPacketType();
+    RedPacketInfo redPacketInfo = new RedPacketInfo();
+    redPacketInfo.redPacketId = redPacketId;
+    redPacketInfo.moneyMsgDirect = getMessageDirect(message);
+    redPacketInfo.chatType = chatType;
+    redPacketInfo.redPacketType = redPacketType;
+    //3.4.0版之前集成过红包的用户，需要增加如下参数的传入对旧版本进行兼容
+    if (!TextUtils.isEmpty(redPacketType) && redPacketType.equals(
+            RPConstant.GROUP_RED_PACKET_TYPE_EXCLUSIVE)) {
       /**
        * 打开专属红包需要多传一下的参数
        */
-      redPacketInfo.specialNickname = rpUserBean.userNickname;
-      redPacketInfo.specialAvatarUrl = rpUserBean.userAvatar;
-      redPacketInfo.toUserId=selfId;
+      redPacketInfo.specialNickname = 
+        TextUtils.isEmpty(UserCacheUtils.getCachedUser(message.getReceiverId()).getUsername()) ? 
+        "" : UserCacheUtils.getCachedUser(message.getReceiverId()).getUsername();
+      redPacketInfo.specialAvatarUrl = 
+        TextUtils.isEmpty(UserCacheUtils.getCachedUser(message.getReceiverId()).getAvatarUrl()) ? 
+        "none" : UserCacheUtils.getCachedUser(message.getReceiverId()).getAvatarUrl();
     }
-    RPOpenPacketUtil.getInstance().openRedPacket(redPacketInfo,
-      RedPacketUtils.getInstance().getTokenData(),
-      (FragmentActivity) context,
-      new RPOpenPacketUtil.RPOpenPacketCallBack() {
-        @Override
-        public void onSuccess(String senderId, String senderNickname) {
-        
-          RedPacketUtils.getInstance().sendRedPacketAckMsg(senderId, senderNickname,         selfId, selfName, message);           
-        }
+    //兼容end
+    return redPacketInfo;
+  }
 
-        @Override
-        public void showLoading() {
-          progressDialog.show();
-        }
-
-        @Override
-        public void hideLoading() {
-          progressDialog.dismiss();
-        }
-
-        @Override
-        public void onError(String code, String message) { /*错误处理*/
-          Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-        }
-      });
-  }    
+  private String getMessageDirect(LCIMRedPacketMessage message) {
+    String selfId = LeanchatUser.getCurrentUserId();
+    String moneyMsgDirect; /*判断发送还是接收*/
+    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
+      moneyMsgDirect = RPConstant.MESSAGE_DIRECT_SEND;
+    } else {
+      moneyMsgDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
+    }
+    return moneyMsgDirect;
+  } 
 ```
 * 接受红包消息之后会话列表回执消息的处理 LCIMRedPcketAckMessage
 
@@ -431,8 +446,9 @@
       boolean isMe = fromMe(typedMessage);
       if (typedMessage.getMessageType() == LCIMRedPacketMessage.RED_PACKET_MESSAGE_TYPE) {
         return isMe ? ITEM_RIGHT_TEXT_RED_PACKET : ITEM_LEFT_TEXT_RED_PACKET;
-      } else if (typedMessage.getMessageType() ==       LCIMRedPacketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE) {
-       return      RedPacketUtils.getInstance().receiveRedPacketAckMsg((LCIMRedPacketAckMessage) typedMessage,ITEM_TEXT_RED_PACKET_NOTIFY,ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER);
+      } else if (typedMessage.getMessageType() ==       
+                 LCIMRedPacketAckMessage.RED_PACKET_ACK_MESSAGE_TYPE) {
+       return      RedPacketUtils.getInstance().receiveRedPacketAckMsg((LCIMRedPacketAckMessage)                                                                 typedMessage,ITEM_TEXT_RED_PACKET_NOTIFY,ITEM_TEXT_RED_PACKET_NOTIFY_MEMBER);
       }
     }
     return super.getItemViewType(position);

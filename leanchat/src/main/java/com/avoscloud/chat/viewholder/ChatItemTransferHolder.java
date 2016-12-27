@@ -1,7 +1,6 @@
 package com.avoscloud.chat.viewholder;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -11,10 +10,9 @@ import com.avos.avoscloud.im.v2.AVIMMessage;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.model.LCIMTransferMessage;
 import com.avoscloud.chat.model.LeanchatUser;
-import com.avoscloud.chat.redpacket.RedPacketUtils;
 import com.yunzhanghu.redpacketsdk.bean.RedPacketInfo;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
-import com.yunzhanghu.redpacketui.ui.activity.RPTransferDetailActivity;
+import com.yunzhanghu.redpacketui.utils.RPRedPacketUtil;
 
 import cn.leancloud.chatkit.viewholder.LCIMChatItemHolder;
 
@@ -67,31 +65,39 @@ public class ChatItemTransferHolder extends LCIMChatItemHolder {
   }
 
   /**
-   * Method name:openRedPacket
-   * Describe: 打开红包
-   * Create person：侯洪旭
-   * Create time：16/7/29 下午3:27
-   * Remarks：
+   * 打开转账红包方法
+   *
+   * @param context
+   * @param message
    */
   private void openTransfer(final Context context, final LCIMTransferMessage message) {
-    final String fromNickname = LeanchatUser.getCurrentUser().getUsername();
-    String fromAvatarUrl = LeanchatUser.getCurrentUser().getAvatarUrl();
-    final String selfId = LeanchatUser.getCurrentUserId();
-    String moneyMsgDirect; /*判断发送还是接收*/
-    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
-      moneyMsgDirect = RPConstant.MESSAGE_DIRECT_SEND;
-    } else {
-      moneyMsgDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
-    }
+    RPRedPacketUtil.getInstance().openTransferPacket(context, wrapperTransferInfo(message));
+  }
+
+  /**
+   * 封装打开转账红包所需参数
+   *
+   * @param message EMMessage
+   * @return RedPacketInfo
+   */
+  private RedPacketInfo wrapperTransferInfo(LCIMTransferMessage message) {
+    String transferAmount = message.getTransferAmount();
+    String time = message.getTransferTime();
     RedPacketInfo redPacketInfo = new RedPacketInfo();
-    redPacketInfo.moneyMsgDirect = moneyMsgDirect;
-    redPacketInfo.redPacketAmount = message.getTransferAmount();
-    redPacketInfo.fromNickName = fromNickname;
-    redPacketInfo.fromAvatarUrl = fromAvatarUrl;
-    redPacketInfo.transferTime = message.getTransferTime();
-    Intent intent = new Intent(context, RPTransferDetailActivity.class);
-    intent.putExtra(RPConstant.EXTRA_RED_PACKET_INFO, redPacketInfo);
-    intent.putExtra(RPConstant.EXTRA_TOKEN_DATA, RedPacketUtils.getInstance().getTokenData());
-    context.startActivity(intent);
+    redPacketInfo.messageDirect = getMessageDirect(message);
+    redPacketInfo.redPacketAmount = transferAmount;
+    redPacketInfo.transferTime = time;
+    return redPacketInfo;
+  }
+
+  private String getMessageDirect(LCIMTransferMessage message) {
+    String selfId = LeanchatUser.getCurrentUserId();
+    String messageDirect; /*判断发送还是接收*/
+    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
+      messageDirect = RPConstant.MESSAGE_DIRECT_SEND;
+    } else {
+      messageDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
+    }
+    return messageDirect;
   }
 }

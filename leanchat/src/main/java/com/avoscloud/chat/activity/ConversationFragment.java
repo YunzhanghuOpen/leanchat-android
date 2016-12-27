@@ -12,8 +12,6 @@ import android.widget.Toast;
 
 import com.avos.avoscloud.AVGeoPoint;
 import com.avos.avoscloud.im.v2.AVIMConversation;
-import com.avos.avoscloud.im.v2.AVIMException;
-import com.avos.avoscloud.im.v2.callback.AVIMConversationMemberCountCallback;
 import com.avos.avoscloud.im.v2.messages.AVIMLocationMessage;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.adapter.ChatAdapter;
@@ -21,19 +19,11 @@ import com.avoscloud.chat.event.InputRedPacketClickEvent;
 import com.avoscloud.chat.event.InputTransferClickEvent;
 import com.avoscloud.chat.event.RedPacketAckEvent;
 import com.avoscloud.chat.model.ConversationType;
-import com.avoscloud.chat.model.LCIMRedPacketMessage;
-import com.avoscloud.chat.model.LCIMTransferMessage;
-import com.avoscloud.chat.model.LeanchatUser;
-import com.avoscloud.chat.redpacket.GetGroupMemberCallback;
 import com.avoscloud.chat.redpacket.RedPacketUtils;
 import com.avoscloud.chat.util.ConversationUtils;
-import com.yunzhanghu.redpacketsdk.RPGroupMemberListener;
-import com.yunzhanghu.redpacketsdk.RPValueCallback;
-import com.yunzhanghu.redpacketsdk.RedPacket;
-import com.yunzhanghu.redpacketsdk.bean.RPUserBean;
+import com.yunzhanghu.redpacketsdk.RPSendPacketCallback;
+import com.yunzhanghu.redpacketsdk.bean.RedPacketInfo;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
-
-import java.util.List;
 
 import cn.leancloud.chatkit.activity.LCIMConversationFragment;
 import cn.leancloud.chatkit.adapter.LCIMChatAdapter;
@@ -47,8 +37,6 @@ import de.greenrobot.event.EventBus;
  */
 public class ConversationFragment extends LCIMConversationFragment {
 
-  private static final int REQUEST_CODE_SEND_RED_PACKET = 4;
-  private static final int REQUEST_CODE_TRANSFER = 5;
   public static final int LOCATION_REQUEST = 100;
 
   @Override
@@ -101,16 +89,33 @@ public class ConversationFragment extends LCIMConversationFragment {
     if (null != imConversation && null != clickEvent
             && imConversation.getConversationId().equals(clickEvent.tag)) {
       String toUserId = ConversationUtils.getConversationPeerId(imConversation);
-      String selfName = LeanchatUser.getCurrentUser().getUsername();
-      String selfAvatar = LeanchatUser.getCurrentUser().getAvatarUrl();
-      RedPacketUtils.getInstance().selectTransfer(ConversationFragment.this, toUserId, selfName, selfAvatar, REQUEST_CODE_TRANSFER);
+      RedPacketUtils.getInstance().startRedPacket(getActivity(), imConversation, RPConstant.RP_ITEM_TYPE_TRANSFER, toUserId, new RPSendPacketCallback() {
+        @Override
+        public void onSendPacketSuccess(RedPacketInfo redPacketInfo) {
+          sendMessage(RedPacketUtils.getInstance().createTRMessage(redPacketInfo));
+        }
+      });
     }
   }
 
   public void onEvent(InputRedPacketClickEvent clickEvent) {
     if (null != imConversation && null != clickEvent
             && imConversation.getConversationId().equals(clickEvent.tag)) {
-      selectRedPacket();
+      int itemType = RPConstant.RP_ITEM_TYPE_SINGLE;
+      String toChatId = "";
+      if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Single) {
+        toChatId = ConversationUtils.getConversationPeerId(imConversation);
+        itemType = RPConstant.RP_ITEM_TYPE_SINGLE;
+      } else if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Group) {
+        itemType = RPConstant.RP_ITEM_TYPE_GROUP;
+        toChatId = imConversation.getConversationId();
+      }
+      RedPacketUtils.getInstance().startRedPacket(getActivity(), imConversation, itemType, toChatId, new RPSendPacketCallback() {
+        @Override
+        public void onSendPacketSuccess(RedPacketInfo redPacketInfo) {
+          sendMessage(RedPacketUtils.getInstance().createRPMessage(getActivity(), redPacketInfo));
+        }
+      });
     }
   }
 
@@ -130,75 +135,12 @@ public class ConversationFragment extends LCIMConversationFragment {
     }
   }
 
-  /**
-   * 点击红包按钮之后的逻辑处理,分为两个部分,一是单聊发红包,二是,群聊发红包
-   */
-  public void selectRedPacket() {
-    if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Single) {
-      gotoSingleRedPacket(ConversationUtils.getConversationPeerId(imConversation));
-    } else if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Group) {
-      gotoGroupRedPacket();
-    }
-  }
-
-  private void gotoSingleRedPacket(final String peerId) {
-    int chatType = RPConstant.CHATTYPE_SINGLE;
-    int membersNum = 0;
-    String tpGroupId = "";
-    String selfName = LeanchatUser.getCurrentUser().getUsername();
-    String selfAvatar = LeanchatUser.getCurrentUser().getAvatarUrl();
-    RedPacketUtils.selectRedPacket(ConversationFragment.this, peerId, selfName, selfAvatar, chatType, tpGroupId, membersNum, REQUEST_CODE_SEND_RED_PACKET);
-  }
-
-  private void gotoGroupRedPacket() {
-    final String fromNickname = LeanchatUser.getCurrentUser().getUsername();
-    final String fromAvatarUrl = LeanchatUser.getCurrentUser().getAvatarUrl();
-    /**
-     * 发送专属红包用的,获取群组成员
-     */
-    RedPacketUtils.getInstance().initRpGroupMember(imConversation.getMembers(), new GetGroupMemberCallback() {
-      @Override
-      public void groupInfoSuccess(final List<RPUserBean> rpUserList) {
-        /**
-         * 获取群成员消息成功调用
-         */
-        RedPacket.getInstance().setRPGroupMemberListener(new RPGroupMemberListener() {
-          @Override
-          public void getGroupMember(String s, RPValueCallback<List<RPUserBean>> rpValueCallback) {
-            rpValueCallback.onSuccess(rpUserList);
-          }
-        });
-      }
-
-      @Override
-      public void groupInfoError() {
-
-      }
-    });
-
-    imConversation.getMemberCount(new AVIMConversationMemberCountCallback() {
-      @Override
-      public void done(Integer integer, AVIMException e) {
-        int chatType = RPConstant.CHATTYPE_GROUP;
-        String tpGroupId = imConversation.getConversationId();
-        int membersNum = integer;
-        RedPacketUtils.selectRedPacket(ConversationFragment.this, "", fromNickname, fromAvatarUrl, chatType, tpGroupId, membersNum, REQUEST_CODE_SEND_RED_PACKET);
-      }
-    });
-  }
-
   @TargetApi(Build.VERSION_CODES.KITKAT)
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     if (Activity.RESULT_OK == resultCode) {
       switch (requestCode) {
-        case REQUEST_CODE_TRANSFER:
-          processTransfer(data);
-          break;
-        case REQUEST_CODE_SEND_RED_PACKET:
-          processReadPack(data);
-          break;
         case LOCATION_REQUEST:
           processMap(data);
           break;
@@ -220,46 +162,6 @@ public class ConversationFragment extends LCIMConversationFragment {
     } else {
       Toast.makeText(getContext(), R.string.chat_cannotGetYourAddressInfo, Toast.LENGTH_SHORT).show();
     }
-  }
-
-  /**
-   * 发送红包之后设置红包消息的数据
-   *
-   * @param data
-   */
-  private void processReadPack(Intent data) {
-    if (data != null) {
-      String greetings = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_GREETING);
-      String redPacketId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_ID);
-      String sponsorName = getResources().getString(R.string.leancloud_luckymoney);
-      String redPacketType = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_TYPE);//群红包类型
-      String specialReceiveId = data.getStringExtra(RPConstant.EXTRA_RED_PACKET_RECEIVER_ID);//专属红包接受者ID
-      String selfName = LeanchatUser.getCurrentUser().getUsername();
-      String selfID = LeanchatUser.getCurrentUserId();
-
-      LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
-      redPacketMessage.setGreeting(greetings);
-      redPacketMessage.setRedPacketId(redPacketId);
-      redPacketMessage.setSponsorName(sponsorName);
-      redPacketMessage.setRedPacketType(redPacketType);
-      redPacketMessage.setReceiverId(specialReceiveId);
-      redPacketMessage.setMoney(true);
-      redPacketMessage.setSenderName(selfName);
-      redPacketMessage.setSenderId(selfID);
-      sendMessage(redPacketMessage);
-    }
-  }
-
-  private void processTransfer(Intent data) {
-    String transferAmount = data.getStringExtra(RPConstant.EXTRA_TRANSFER_AMOUNT);
-    String transferTime = data.getStringExtra(RPConstant.EXTRA_TRANSFER_PACKET_TIME);
-    String transferToUserId = data.getStringExtra(RPConstant.EXTRA_TRANSFER_RECEIVER_ID);
-    LCIMTransferMessage transferMessage = new LCIMTransferMessage();
-    transferMessage.setTransferAmount(transferAmount);
-    transferMessage.setTransferTime(transferTime);
-    transferMessage.setTransferMessage(true);
-    transferMessage.setTransferToUserId(transferToUserId);
-    sendMessage(transferMessage);
   }
 
   @Override

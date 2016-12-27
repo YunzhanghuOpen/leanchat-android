@@ -14,9 +14,7 @@ import com.avos.avoscloud.im.v2.AVIMMessage;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
 import com.avoscloud.chat.model.LeanchatUser;
-import com.avoscloud.chat.redpacket.GetUserInfoCallback;
-import com.avoscloud.chat.redpacket.RedPacketUtils;
-import com.yunzhanghu.redpacketsdk.bean.RPUserBean;
+import com.avoscloud.chat.util.UserCacheUtils;
 import com.yunzhanghu.redpacketsdk.bean.RedPacketInfo;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
 import com.yunzhanghu.redpacketui.utils.RPRedPacketUtil;
@@ -37,8 +35,6 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
   protected TextView mTvPacketType;
 
   LCIMRedPacketMessage redPacketMessage;
-
-  protected RPUserBean rpUserBean;
 
   public ChatItemRedPacketHolder(Context context, ViewGroup root, boolean isLeft) {
     super(context, root, isLeft);
@@ -84,20 +80,6 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
         mTvPacketType.setVisibility(View.VISIBLE);
         mTvPacketType.setText(getContext().getResources().getString(
                 R.string.exclusive_red_envelope));
-        /**
-         * 打开专属红包,需要获取接收人的用户信息
-         */
-        RedPacketUtils.getInstance().getReceiveInfo(redPacketMessage.getReceiverId(), new GetUserInfoCallback() {
-          @Override
-          public void userInfoSuccess(RPUserBean rpUser) {
-            rpUserBean = rpUser;
-          }
-
-          @Override
-          public void userInfoError() {
-
-          }
-        });
       } else {
         mTvPacketType.setVisibility(View.GONE);
       }
@@ -115,15 +97,6 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
     final ProgressDialog progressDialog = new ProgressDialog(context);
     progressDialog.setCanceledOnTouchOutside(false);
 
-    final String selfName = LeanchatUser.getCurrentUser().getUsername();
-    String selfAvatar = LeanchatUser.getCurrentUser().getAvatarUrl();
-    final String selfId = LeanchatUser.getCurrentUserId();
-    String moneyMsgDirect; /*判断发送还是接收*/
-    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
-      moneyMsgDirect = RPConstant.MESSAGE_DIRECT_SEND;
-    } else {
-      moneyMsgDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
-    }
     int chatType;
     if (!TextUtils.isEmpty(message.getRedPacketType())) {
       chatType = RPConstant.CHATTYPE_GROUP;
@@ -131,23 +104,11 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
       chatType = RPConstant.CHATTYPE_SINGLE;
     }
 
-    final RedPacketInfo redPacketInfo = RedPacketUtils.initRedPacketInfo_received(
-            selfName, selfAvatar, moneyMsgDirect, chatType, message.getRedPacketId());
-    if (null != rpUserBean) {
-      /**
-       * 打开专属红包需要多传一下的参数
-       */
-      redPacketInfo.specialNickname = rpUserBean.userNickname;
-      redPacketInfo.specialAvatarUrl = rpUserBean.userAvatar;
-      redPacketInfo.toUserId = selfId;
-    }
-    RPRedPacketUtil.getInstance().openRedPacket(redPacketInfo,
-            RedPacketUtils.getInstance().getTokenData(),
+    RPRedPacketUtil.getInstance().openRedPacket(wrapperRedPacketInfo(chatType, message),
             (FragmentActivity) context,
             new RPRedPacketUtil.RPOpenPacketCallback() {
               @Override
-              public void onSuccess(String senderId, String senderNickname, String myAmount) {//因为ios还不能处理领红包之后的回调消息
-//                RedPacketUtils.getInstance().sendRedPacketAckMsg(senderId, senderNickname, selfId, selfName, message);
+              public void onSuccess(String senderId, String senderNickname, String myAmount) {
               }
 
               @Override
@@ -165,5 +126,44 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
               }
             });
+  }
+
+  /**
+   * 封装拆红包所需参数
+   *
+   * @param chatType 聊天类型
+   * @param message  EMMessage
+   * @return RedPacketInfo
+   */
+  private RedPacketInfo wrapperRedPacketInfo(int chatType, LCIMRedPacketMessage message) {
+    String redPacketId = message.getRedPacketId();
+    String redPacketType = message.getRedPacketType();
+    RedPacketInfo redPacketInfo = new RedPacketInfo();
+    redPacketInfo.redPacketId = redPacketId;
+    redPacketInfo.messageDirect = getMessageDirect(message);
+    redPacketInfo.chatType = chatType;
+    redPacketInfo.redPacketType = redPacketType;
+    //3.4.0版之前集成过红包的用户，需要增加如下参数的传入对旧版本进行兼容
+    if (!TextUtils.isEmpty(redPacketType) && redPacketType.equals(
+            RPConstant.GROUP_RED_PACKET_TYPE_EXCLUSIVE)) {
+      /**
+       * 打开专属红包需要多传一下的参数
+       */
+      redPacketInfo.specialNickname = TextUtils.isEmpty(UserCacheUtils.getCachedUser(message.getReceiverId()).getUsername()) ? "" : UserCacheUtils.getCachedUser(message.getReceiverId()).getUsername();
+      redPacketInfo.specialAvatarUrl = TextUtils.isEmpty(UserCacheUtils.getCachedUser(message.getReceiverId()).getAvatarUrl()) ? "none" : UserCacheUtils.getCachedUser(message.getReceiverId()).getAvatarUrl();
+    }
+    //兼容end
+    return redPacketInfo;
+  }
+
+  private String getMessageDirect(LCIMRedPacketMessage message) {
+    String selfId = LeanchatUser.getCurrentUserId();
+    String messageDirect; /*判断发送还是接收*/
+    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
+      messageDirect = RPConstant.MESSAGE_DIRECT_SEND;
+    } else {
+      messageDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
+    }
+    return messageDirect;
   }
 }

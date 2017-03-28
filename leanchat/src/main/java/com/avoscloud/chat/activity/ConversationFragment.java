@@ -24,6 +24,7 @@ import com.avoscloud.chat.util.ConversationUtils;
 import com.yunzhanghu.redpacketsdk.RPSendPacketCallback;
 import com.yunzhanghu.redpacketsdk.bean.RedPacketInfo;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
+import com.yunzhanghu.redpacketui.utils.RPRedPacketUtil;
 
 import cn.leancloud.chatkit.activity.LCIMConversationFragment;
 import cn.leancloud.chatkit.adapter.LCIMChatAdapter;
@@ -180,5 +181,11 @@ public class ConversationFragment extends LCIMConversationFragment {
 //    if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Single) {//添加转账按钮
 //      addTransferView();
 //    }
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    RPRedPacketUtil.getInstance().detachView();
   }
 }

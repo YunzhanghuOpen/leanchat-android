@@ -94,6 +94,11 @@ public class ConversationFragment extends LCIMConversationFragment {
         public void onSendPacketSuccess(RedPacketInfo redPacketInfo) {
           sendMessage(RedPacketUtils.getInstance().createTRMessage(redPacketInfo));
         }
+
+        @Override
+        public void onGenerateRedPacketId(String s) {
+
+        }
       });
     }
   }
@@ -114,6 +119,11 @@ public class ConversationFragment extends LCIMConversationFragment {
         @Override
         public void onSendPacketSuccess(RedPacketInfo redPacketInfo) {
           sendMessage(RedPacketUtils.getInstance().createRPMessage(getActivity(), redPacketInfo));
+        }
+
+        @Override
+        public void onGenerateRedPacketId(String s) {
+
         }
       });
     }

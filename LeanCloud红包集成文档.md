@@ -48,7 +48,7 @@
     compile files('libs/glide-3.6.1.jar')
     compile files('libs/volley-1.0.19.jar')
     compile files('libs/libammsdk.jar')
-    compile('com.yunzhanghu:redpacket:3.4.0@aar')
+    compile('com.yunzhanghu:redpacket:3.4.4@aar')
     allprojects {
     repositories {
         jcenter()
@@ -70,57 +70,6 @@
 
     <uses-sdk
         android:minSdkVersion="15"/>
- 
-    <!--红包相关界面 start-->
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPRedPacketActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateVisible" />
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPDetailActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPRecordActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPWebViewActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPChangeActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPBankCardActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
-    <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPGroupMemberActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
-    <activity
-            android:name="com.alipay.sdk.app.H5PayActivity"
-            android:configChanges="orientation|keyboardHidden|navigation|screenSize"
-            android:exported="false"
-            android:screenOrientation="behind"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
-     <!-- 转账页面 -->
-     <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPTransferActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/horizontal_slide"
-            android:windowSoftInputMode="adjustPan|stateVisible"/>
-      <!-- 转账详情页面 -->
-      <activity
-            android:name="com.yunzhanghu.redpacketui.ui.activity.RPTransferDetailActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/horizontal_slide"
-            android:windowSoftInputMode="adjustPan|stateHidden"/>
        <!-- 微信支付回调页面 -->
        <activity
             android:name="com.avoscloud.chat.wxapi.WXPayEntryActivity"

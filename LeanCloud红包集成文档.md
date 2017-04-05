@@ -12,7 +12,6 @@
   * alipaySdk-20160516支付宝支付
   * glide-3.6.1图片加载库
   * volley-1.0.19请求框架
-  * libammsdk微信支付
 
 * res ：包含了红包SDK和聊天页面中的资源文件。（红包SDK相关以lc_开头）
 
@@ -34,8 +33,6 @@
   * ChatItemRedPacketAckHolder 回执消息UI展示提供者
   * ChatItemRedPacketEmptyHolder 空消息用于隐藏和自己不相关的消息
 
-  **注意: redpacketlibrary-aar只支持AndroidStudio**。
-
   **注意: 拆红包添加音效，需要在assets中引入open_packet_sound.mp3(文件名必须为此名，暂时支持mp3和wav格式)**。
 
 ## 3. 集成步骤
@@ -52,7 +49,7 @@
     repositories {
         jcenter()
         maven {
-            url "https://raw.githubusercontent.com/YunzhanghuOpen/redpacket-maven-repo/dev/snapshots"
+            url "https://raw.githubusercontent.com/YunzhanghuOpen/redpacket-maven-repo/master/release"
         }
     }
 }
@@ -63,11 +60,11 @@
 ```java
     include ':leanchat'
 ```
-### 3.2 leanchat-android清单文件中注册红包相关组件
+### 3.2 Application中注册消息组件
 
 ```java
-
-   红包相关组件不需要在项目中再次声明
+   AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketMessage.class);
+   AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketAckMessage.class);
 ```
 ### 3.3 初始化红包上下文
 
@@ -84,6 +81,7 @@
                                               RPInitRedPacketCallback() {       
       @Override
       public void initTokenData(final RPValueCallback<TokenData> rpValueCallback) {
+           //在此方法中设置Token
            RedPacketUtils.getInstance().getRedPacketSign(ctx, new                                          
                                                          GetSignInfoCallback() {
           @Override
@@ -109,11 +107,6 @@
     });
         // 控制红包SDK中Log打印
         RedPacket.getInstance().setDebugMode(true);
-      	// 注册红包相关消息
-        AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketMessage.class);
-        AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketAckMessage.class);
-        AVIMMessageManager.registerAVIMMessageType(LCIMTransferMessage.class);
-    }
 ```
 
 ### 3.4 ProfileFragment添加零钱页的入口

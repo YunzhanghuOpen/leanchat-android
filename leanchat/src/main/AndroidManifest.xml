@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
           package="com.avoscloud.chat"
           android:versionCode="19"
           android:versionName="1.0.3">
@@ -124,12 +123,6 @@
         <activity
             android:name=".activity.ConversationAddMembersActivity"
             android:label="@string/conversation_inviteMembers"/>
-
-        <activity
-            android:name="com.avoscloud.chat.wxapi.WXPayEntryActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            />
 
         <service
             android:name="com.baidu.location.f"

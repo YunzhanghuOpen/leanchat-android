@@ -47,8 +47,7 @@
     compile files('libs/alipaySdk-20160516.jar')
     compile files('libs/glide-3.6.1.jar')
     compile files('libs/volley-1.0.19.jar')
-    compile files('libs/libammsdk.jar')
-    compile('com.yunzhanghu:redpacket:3.4.4@aar')
+    compile('com.yunzhanghu.redpacket:redpacket-wallet:3.4.5')
     allprojects {
     repositories {
         jcenter()
@@ -68,14 +67,7 @@
 
 ```java
 
-    <uses-sdk
-        android:minSdkVersion="15"/>
-       <!-- 微信支付回调页面 -->
-       <activity
-            android:name="com.avoscloud.chat.wxapi.WXPayEntryActivity"
-            android:exported="true"
-            android:launchMode="singleTop"/>
-    <!--红包相关界面 end-->
+   红包相关组件不需要在项目中再次声明
 ```
 ### 3.3 初始化红包上下文
 

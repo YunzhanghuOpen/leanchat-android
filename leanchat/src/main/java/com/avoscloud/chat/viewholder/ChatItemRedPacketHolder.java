@@ -14,7 +14,6 @@ import com.avos.avoscloud.im.v2.AVIMMessage;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
 import com.avoscloud.chat.model.LeanchatUser;
-import com.avoscloud.chat.util.UserCacheUtils;
 import com.yunzhanghu.redpacketsdk.bean.RedPacketInfo;
 import com.yunzhanghu.redpacketsdk.constant.RPConstant;
 import com.yunzhanghu.redpacketui.utils.RPRedPacketUtil;
@@ -26,15 +25,13 @@ import cn.leancloud.chatkit.viewholder.LCIMChatItemHolder;
  */
 public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
 
-  protected TextView mTvGreeting;
+  private TextView mTvGreeting;
 
-  protected TextView mTvSponsorName;
+  private TextView mTvSponsorName;
 
-  protected RelativeLayout mRedPacketLayout;
+  private TextView mTvPacketType;
 
-  protected TextView mTvPacketType;
-
-  LCIMRedPacketMessage redPacketMessage;
+  private LCIMRedPacketMessage mRedPacketMessage;
 
   public ChatItemRedPacketHolder(Context context, ViewGroup root, boolean isLeft) {
     super(context, root, isLeft);
@@ -50,16 +47,16 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
       conventLayout.addView(View.inflate(getContext(),
               R.layout.lc_chat_item_right_text_redpacket_layout, null)); /*红包view*/
     }
-    mRedPacketLayout = (RelativeLayout) itemView.findViewById(R.id.red_packet_layout);
+    RelativeLayout redPacketLayout = (RelativeLayout) itemView.findViewById(R.id.red_packet_layout);
     mTvGreeting = (TextView) itemView.findViewById(R.id.tv_money_greeting);
     mTvSponsorName = (TextView) itemView.findViewById(R.id.tv_sponsor_name);
     mTvPacketType = (TextView) itemView.findViewById(R.id.tv_packet_type);
 
-    mRedPacketLayout.setOnClickListener(new View.OnClickListener() {
+    redPacketLayout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if (null != redPacketMessage) {
-          openRedPacket(getContext(), redPacketMessage);
+        if (null != mRedPacketMessage) {
+          openRedPacket(getContext(), mRedPacketMessage);
         }
       }
     });
@@ -70,11 +67,11 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
     super.bindData(o);
     AVIMMessage message = (AVIMMessage) o;
     if (message instanceof LCIMRedPacketMessage) {
-      redPacketMessage = (LCIMRedPacketMessage) message;
-      mTvGreeting.setText(redPacketMessage.getGreeting());
-      mTvSponsorName.setText(redPacketMessage.getSponsorName());
+      mRedPacketMessage = (LCIMRedPacketMessage) message;
+      mTvGreeting.setText(mRedPacketMessage.getGreeting());
+      mTvSponsorName.setText(mRedPacketMessage.getSponsorName());
 
-      String redPacketType = redPacketMessage.getRedPacketType();
+      String redPacketType = mRedPacketMessage.getRedPacketType();
       if (!TextUtils.isEmpty(redPacketType) && redPacketType.equals(
               RPConstant.GROUP_RED_PACKET_TYPE_EXCLUSIVE)) {
         mTvPacketType.setVisibility(View.VISIBLE);
@@ -137,22 +134,10 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
    */
   private RedPacketInfo wrapperRedPacketInfo(int chatType, LCIMRedPacketMessage message) {
     String redPacketId = message.getRedPacketId();
-    String redPacketType = message.getRedPacketType();
     RedPacketInfo redPacketInfo = new RedPacketInfo();
     redPacketInfo.redPacketId = redPacketId;
     redPacketInfo.messageDirect = getMessageDirect(message);
     redPacketInfo.chatType = chatType;
-    redPacketInfo.redPacketType = redPacketType;
-    //3.4.0版之前集成过红包的用户，需要增加如下参数的传入对旧版本进行兼容
-    if (!TextUtils.isEmpty(redPacketType) && redPacketType.equals(
-            RPConstant.GROUP_RED_PACKET_TYPE_EXCLUSIVE)) {
-      /**
-       * 打开专属红包需要多传一下的参数
-       */
-      redPacketInfo.specialNickname = TextUtils.isEmpty(UserCacheUtils.getCachedUser(message.getReceiverId()).getUsername()) ? "" : UserCacheUtils.getCachedUser(message.getReceiverId()).getUsername();
-      redPacketInfo.specialAvatarUrl = TextUtils.isEmpty(UserCacheUtils.getCachedUser(message.getReceiverId()).getAvatarUrl()) ? "none" : UserCacheUtils.getCachedUser(message.getReceiverId()).getAvatarUrl();
-    }
-    //兼容end
     return redPacketInfo;
   }
 

@@ -38,14 +38,9 @@ import java.util.List;
 import cn.leancloud.chatkit.LCChatKit;
 import de.greenrobot.event.EventBus;
 
-/**
- * Created by ustc on 2016/5/31.
- */
 public class RedPacketUtils {
 
   private static RedPacketUtils mRedPacketUtil;
-
-  private RequestQueue mQueue;
 
   private RedPacketUtils() {
   }
@@ -65,9 +60,8 @@ public class RedPacketUtils {
   public void startRedPacket(final FragmentActivity activity, final AVIMConversation imConversation, final int itemType, final String toUserId, final RPSendPacketCallback callback) {
     final RedPacketInfo redPacketInfo = new RedPacketInfo();
     if (itemType == RPConstant.RP_ITEM_TYPE_GROUP) {
-      /**
-       * 发送专属红包用的,获取群组成员
-       */
+
+      //发送专属红包用的,获取群组成员
       RedPacket.getInstance().setRPGroupMemberListener(new RPGroupMemberListener() {
         @Override
         public void getGroupMember(String s, final RPValueCallback<List<RPUserBean>> rpValueCallback) {
@@ -136,8 +130,8 @@ public class RedPacketUtils {
    * 根据一个群成员的id集合,查出群成员的具体信息,发专属红包时需要传群成员信息
    */
 
-  public void initRpGroupMember(List<String> ids, final GetGroupMemberCallback callback) {
-    final List<RPUserBean> rpUserList = new ArrayList<RPUserBean>();
+  private void initRpGroupMember(List<String> ids, final GetGroupMemberCallback callback) {
+    final List<RPUserBean> rpUserList = new ArrayList<>();
 
     UserCacheUtils.fetchUsers(ids, new UserCacheUtils.CacheUserCallback() {
       RPUserBean rpUserBean;
@@ -160,10 +154,8 @@ public class RedPacketUtils {
             }
           }
         }
-        /**
-         * 查到数据进行回调
-         */
-        if (rpUserList != null && rpUserList.size() > 0) {
+        //查到数据进行回调
+        if (rpUserList.size() > 0) {
           callback.groupInfoSuccess(rpUserList);
         } else {
           callback.groupInfoError();
@@ -175,12 +167,10 @@ public class RedPacketUtils {
 
   /**
    * 获取sign
-   *
-   * @param context
    */
   public void getRedPacketSign(Context context, final GetSignInfoCallback callback) {
     String mockUrl = "http://rpv2.yunzhanghu.com/api/sign?duid=" + LeanchatUser.getCurrentUserId();
-    mQueue = Volley.newRequestQueue(context);
+    RequestQueue requestQueue = Volley.newRequestQueue(context);
     StringRequest stringRequest = new StringRequest(mockUrl, new Response.Listener<String>() {
       @Override
       public void onResponse(String s) {
@@ -191,9 +181,7 @@ public class RedPacketUtils {
             final String userId = jsonObj.getString("user_id");
             final String timestamp = jsonObj.getString("timestamp");
             final String sign = jsonObj.getString("sign");
-            /**
-             * 零钱页和领取红包和发红包时都需要
-             */
+            //零钱页和领取红包和发红包时都需要
             TokenData mTokenData = new TokenData();
             mTokenData.authPartner = partner;
             mTokenData.appUserId = userId;
@@ -213,7 +201,7 @@ public class RedPacketUtils {
       }
     });
     stringRequest.setRetryPolicy(new DefaultRetryPolicy(3000, 2, 2));
-    mQueue.add(stringRequest);
+    requestQueue.add(stringRequest);
   }
 
   /**

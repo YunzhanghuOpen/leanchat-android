@@ -17,7 +17,7 @@ public class LCIMRedPacketAckMessage extends AVIMTypedMessage implements LCChatM
   public LCIMRedPacketAckMessage() {
   }
 
-  public static final Creator<LCIMRedPacketAckMessage> CREATOR = new AVIMMessageCreator<LCIMRedPacketAckMessage>(LCIMRedPacketAckMessage.class);
+  public static final Creator<LCIMRedPacketAckMessage> CREATOR = new AVIMMessageCreator<>(LCIMRedPacketAckMessage.class);
 
   public static final int RED_PACKET_ACK_MESSAGE_TYPE = 4;
 
@@ -71,15 +71,15 @@ public class LCIMRedPacketAckMessage extends AVIMTypedMessage implements LCChatM
 
   @Override
   public String getShorthand() {
-    String userId=LeanchatUser.getCurrentUserId();
-    if (userId.equals(senderId)&&userId.equals(recipientId)){
+    String userId = LeanchatUser.getCurrentUserId();
+    if (userId.equals(senderId) && userId.equals(recipientId)) {
       return "你领取了自己的红包";
-    }else if (userId.equals(senderId)&&!userId.equals(recipientId)){
-      return recipientName+"领取了你的红包";
-    }else if (!userId.equals(senderId)&&userId.equals(recipientId)){
-      return "你领取了"+senderName+"的红包";
-    }else if (!userId.equals(senderId)&&!userId.equals(recipientId)){
-      return "["+sponsorName+"]"+greeting;
+    } else if (userId.equals(senderId) && !userId.equals(recipientId)) {
+      return recipientName + "领取了你的红包";
+    } else if (!userId.equals(senderId) && userId.equals(recipientId)) {
+      return "你领取了" + senderName + "的红包";
+    } else if (!userId.equals(senderId) && !userId.equals(recipientId)) {
+      return "[" + sponsorName + "]" + greeting;
     }
     return null;
   }

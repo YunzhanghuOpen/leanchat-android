@@ -14,7 +14,7 @@ import cn.leancloud.chatkit.viewholder.LCIMChatItemHolder;
 
 public class ChatItemRedPacketAckHolder extends LCIMChatItemHolder {
 
-  protected TextView contentView;
+  private TextView contentView;
 
   public ChatItemRedPacketAckHolder(Context context, ViewGroup root, boolean isLeft) {
     super(context, root, isLeft);

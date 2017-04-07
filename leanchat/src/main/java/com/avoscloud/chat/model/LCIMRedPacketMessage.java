@@ -17,7 +17,8 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
 
   public static final int RED_PACKET_MESSAGE_TYPE = 3;
 
-  public LCIMRedPacketMessage() {}
+  public LCIMRedPacketMessage() {
+  }
 
   /**
    * 红包id
@@ -67,11 +68,11 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
   @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_ID)
   private String senderId;
 
-  public static final Creator<LCIMRedPacketMessage> CREATOR = new AVIMMessageCreator<LCIMRedPacketMessage>(LCIMRedPacketMessage.class);
+  public static final Creator<LCIMRedPacketMessage> CREATOR = new AVIMMessageCreator<>(LCIMRedPacketMessage.class);
 
   @Override
   public String getShorthand() {
-    return "["+sponsorName+"]" + greeting;
+    return "[" + sponsorName + "]" + greeting;
   }
 
   public String getRedPacketId() {

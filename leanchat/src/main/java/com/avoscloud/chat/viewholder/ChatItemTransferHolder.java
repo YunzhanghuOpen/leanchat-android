@@ -23,9 +23,7 @@ public class ChatItemTransferHolder extends LCIMChatItemHolder {
 
   private TextView mTvTransfer;
 
-  private RelativeLayout mTransferLayout;
-
-  LCIMTransferMessage transferMessage;
+  private LCIMTransferMessage transferMessage;
 
   public ChatItemTransferHolder(Context context, ViewGroup root, boolean isLeft) {
     super(context, root, isLeft);
@@ -39,12 +37,12 @@ public class ChatItemTransferHolder extends LCIMChatItemHolder {
               R.layout.lc_chat_item_left_text_transfer_layout, null));
     } else {
       conventLayout.addView(View.inflate(getContext(),
-              R.layout.lc_chat_item_right_text_transfer_layout, null)); /*转账view*/
+              R.layout.lc_chat_item_right_text_transfer_layout, null));
     }
-    mTransferLayout = (RelativeLayout) itemView.findViewById(R.id.transfer_layout);
+    RelativeLayout transferLayout = (RelativeLayout) itemView.findViewById(R.id.transfer_layout);
     mTvTransfer = (TextView) itemView.findViewById(R.id.tv_transfer_amount);
 
-    mTransferLayout.setOnClickListener(new View.OnClickListener() {
+    transferLayout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         if (null != transferMessage) {
@@ -66,9 +64,6 @@ public class ChatItemTransferHolder extends LCIMChatItemHolder {
 
   /**
    * 打开转账红包方法
-   *
-   * @param context
-   * @param message
    */
   private void openTransfer(final Context context, final LCIMTransferMessage message) {
     RPRedPacketUtil.getInstance().openTransferPacket(context, wrapperTransferInfo(message));

@@ -140,6 +140,9 @@ public class RedPacketUtils {
             new RPRedPacketUtil.RPOpenPacketCallback() {
               @Override
               public void onSuccess(String senderId, String senderNickname, String myAmount) {
+//                String selfName = LeanchatUser.getCurrentUser().getUsername();
+//                String selfId = LeanchatUser.getCurrentUserId();
+//                sendRedPacketAckMsg(senderId, senderNickname, selfId, selfName, message);
               }
 
               @Override

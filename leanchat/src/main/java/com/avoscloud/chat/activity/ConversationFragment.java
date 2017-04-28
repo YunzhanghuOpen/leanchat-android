@@ -16,7 +16,6 @@ import com.avos.avoscloud.im.v2.messages.AVIMLocationMessage;
 import com.avoscloud.chat.R;
 import com.avoscloud.chat.adapter.ChatAdapter;
 import com.avoscloud.chat.event.InputRedPacketClickEvent;
-import com.avoscloud.chat.event.InputTransferClickEvent;
 import com.avoscloud.chat.event.RedPacketAckEvent;
 import com.avoscloud.chat.model.ConversationType;
 import com.avoscloud.chat.redpacket.RedPacketUtils;
@@ -52,17 +51,6 @@ public class ConversationFragment extends LCIMConversationFragment {
     return new ChatAdapter();
   }
 
-  private void addTransferView() {
-    View transferView = LayoutInflater.from(getContext()).inflate(R.layout.input_bottom_transfer_view, null);
-    transferView.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        EventBus.getDefault().post(new InputTransferClickEvent(imConversation.getConversationId()));
-      }
-    });
-    inputBottomBar.addActionView(transferView);
-  }
-
   private void addRedPacketView() {
     View readPacketView = LayoutInflater.from(getContext()).inflate(R.layout.input_bottom_redpacket_view, null);
     readPacketView.setOnClickListener(new View.OnClickListener() {
@@ -84,24 +72,6 @@ public class ConversationFragment extends LCIMConversationFragment {
       }
     });
     inputBottomBar.addActionView(mapView);
-  }
-
-  public void onEvent(InputTransferClickEvent clickEvent) {
-    if (null != imConversation && null != clickEvent
-            && imConversation.getConversationId().equals(clickEvent.tag)) {
-      String toUserId = ConversationUtils.getConversationPeerId(imConversation);
-      RedPacketUtils.getInstance().startRedPacket(getActivity(), imConversation, RPConstant.RP_ITEM_TYPE_TRANSFER, toUserId, new RPSendPacketCallback() {
-        @Override
-        public void onSendPacketSuccess(RedPacketInfo redPacketInfo) {
-          sendMessage(RedPacketUtils.getInstance().createTRMessage(redPacketInfo));
-        }
-
-        @Override
-        public void onGenerateRedPacketId(String s) {
-
-        }
-      });
-    }
   }
 
   public void onEvent(InputRedPacketClickEvent clickEvent) {
@@ -173,14 +143,6 @@ public class ConversationFragment extends LCIMConversationFragment {
     } else {
       Toast.makeText(getContext(), R.string.chat_cannotGetYourAddressInfo, Toast.LENGTH_SHORT).show();
     }
-  }
-
-  @Override
-  public void setConversation(AVIMConversation conversation) {
-    super.setConversation(conversation);
-//    if (ConversationUtils.typeOfConversation(imConversation) == ConversationType.Single) {//添加转账按钮
-//      addTransferView();
-//    }
   }
 
   @Override

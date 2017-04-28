@@ -19,7 +19,6 @@ import com.avoscloud.chat.R;
 import com.avoscloud.chat.event.RedPacketAckEvent;
 import com.avoscloud.chat.model.LCIMRedPacketAckMessage;
 import com.avoscloud.chat.model.LCIMRedPacketMessage;
-import com.avoscloud.chat.model.LCIMTransferMessage;
 import com.avoscloud.chat.model.LeanchatUser;
 import com.avoscloud.chat.util.UserCacheUtils;
 import com.yunzhanghu.redpacketsdk.RPGroupMemberListener;
@@ -109,22 +108,13 @@ public class RedPacketUtils {
     LCIMRedPacketMessage redPacketMessage = new LCIMRedPacketMessage();
     redPacketMessage.setGreeting(redPacketInfo.redPacketGreeting);
     redPacketMessage.setRedPacketId(redPacketInfo.redPacketId);
-    redPacketMessage.setSponsorName(context.getResources().getString(R.string.leancloud_luckymoney));
+    redPacketMessage.setSponsorName(context.getResources().getString(R.string.leanCloud_luckyMoney));
     redPacketMessage.setRedPacketType(redPacketInfo.redPacketType);
     redPacketMessage.setReceiverId(redPacketInfo.toUserId);
     redPacketMessage.setMoney(true);
     redPacketMessage.setSenderName(selfName);
     redPacketMessage.setSenderId(selfID);
     return redPacketMessage;
-  }
-
-  public LCIMTransferMessage createTRMessage(RedPacketInfo redPacketInfo) {
-    LCIMTransferMessage transferMessage = new LCIMTransferMessage();
-    transferMessage.setTransferAmount(redPacketInfo.redPacketAmount);
-    transferMessage.setTransferTime(redPacketInfo.transferTime);
-    transferMessage.setTransferMessage(true);
-    transferMessage.setTransferToUserId(redPacketInfo.toUserId);
-    return transferMessage;
   }
 
   /**
@@ -186,40 +176,6 @@ public class RedPacketUtils {
   }
 
   private String getMessageDirect(LCIMRedPacketMessage message) {
-    String selfId = LeanchatUser.getCurrentUserId();
-    String messageDirect; /*判断发送还是接收*/
-    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
-      messageDirect = RPConstant.MESSAGE_DIRECT_SEND;
-    } else {
-      messageDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
-    }
-    return messageDirect;
-  }
-
-  /**
-   * 打开转账红包方法
-   */
-  public void openTransfer(final Context context, final LCIMTransferMessage message) {
-    RPRedPacketUtil.getInstance().openTransferPacket(context, wrapperTransferInfo(message));
-  }
-
-  /**
-   * 封装打开转账红包所需参数
-   *
-   * @param message EMMessage
-   * @return RedPacketInfo
-   */
-  private RedPacketInfo wrapperTransferInfo(LCIMTransferMessage message) {
-    String transferAmount = message.getTransferAmount();
-    String time = message.getTransferTime();
-    RedPacketInfo redPacketInfo = new RedPacketInfo();
-    redPacketInfo.messageDirect = getMessageDirect(message);
-    redPacketInfo.redPacketAmount = transferAmount;
-    redPacketInfo.transferTime = time;
-    return redPacketInfo;
-  }
-
-  private String getMessageDirect(LCIMTransferMessage message) {
     String selfId = LeanchatUser.getCurrentUserId();
     String messageDirect; /*判断发送还是接收*/
     if (message.getFrom() != null && message.getFrom().equals(selfId)) {

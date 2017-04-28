@@ -87,7 +87,7 @@ public class ProfileFragment extends BaseFragment {
 
   @OnClick(R.id.profile_redpacket_view)
   public void onRPClick() {
-    RPRedPacketUtil.getInstance().startChangeActivity(getActivity());
+    RPRedPacketUtil.getInstance().startRecordActivity(getActivity());
   }
 
   @OnClick(R.id.profile_logout_btn)

@@ -68,7 +68,7 @@ public class ChatItemRedPacketHolder extends LCIMChatItemHolder {
 
       String redPacketType = mRedPacketMessage.getRedPacketType();
       if (!TextUtils.isEmpty(redPacketType) && redPacketType.equals(
-              RPConstant.GROUP_RED_PACKET_TYPE_EXCLUSIVE)) {
+              RPConstant.RED_PACKET_TYPE_GROUP_EXCLUSIVE)) {
         mTvPacketType.setVisibility(View.VISIBLE);
         mTvPacketType.setText(getContext().getResources().getString(
                 R.string.exclusive_red_envelope));

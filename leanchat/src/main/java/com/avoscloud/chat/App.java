@@ -76,9 +76,9 @@ public class App extends Application {
       public RedPacketInfo initCurrentUserSync() {
         //这里需要同步设置当前用户id、昵称和头像url
         RedPacketInfo redPacketInfo = new RedPacketInfo();
-        redPacketInfo.fromUserId = LeanchatUser.getCurrentUserId();
-        redPacketInfo.fromAvatarUrl = LeanchatUser.getCurrentUser().getAvatarUrl();
-        redPacketInfo.fromNickName = LeanchatUser.getCurrentUser().getUsername();
+        redPacketInfo.currentUserId = LeanchatUser.getCurrentUserId();
+        redPacketInfo.currentAvatarUrl = LeanchatUser.getCurrentUser().getAvatarUrl();
+        redPacketInfo.currentNickname = LeanchatUser.getCurrentUser().getUsername();
         return redPacketInfo;
       }
     });

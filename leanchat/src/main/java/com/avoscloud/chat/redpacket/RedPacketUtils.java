@@ -82,17 +82,17 @@ public class RedPacketUtils {
       imConversation.getMemberCount(new AVIMConversationMemberCountCallback() {
         @Override
         public void done(Integer integer, AVIMException e) {
-          redPacketInfo.toGroupId = imConversation.getConversationId();
+          redPacketInfo.groupId = imConversation.getConversationId();
           redPacketInfo.groupMemberCount = integer;
           RPRedPacketUtil.getInstance().startRedPacket(activity, itemType, redPacketInfo, callback);
         }
       });
     } else {
-      redPacketInfo.toUserId = toUserId;
+      redPacketInfo.receiverId = toUserId;
       LeanchatUser leanchatUser = UserCacheUtils.getCachedUser(toUserId);
       if (leanchatUser != null) {
-        redPacketInfo.toNickName = TextUtils.isEmpty(leanchatUser.getUsername()) ? "none" : leanchatUser.getUsername();
-        redPacketInfo.toAvatarUrl = TextUtils.isEmpty(leanchatUser.getAvatarUrl()) ? "" : leanchatUser.getAvatarUrl();
+        redPacketInfo.receiverNickname = TextUtils.isEmpty(leanchatUser.getUsername()) ? "none" : leanchatUser.getUsername();
+        redPacketInfo.receiverAvatarUrl = TextUtils.isEmpty(leanchatUser.getAvatarUrl()) ? "" : leanchatUser.getAvatarUrl();
       }
       RPRedPacketUtil.getInstance().startRedPacket(activity, itemType, redPacketInfo, callback);
     }
@@ -110,7 +110,7 @@ public class RedPacketUtils {
     redPacketMessage.setRedPacketId(redPacketInfo.redPacketId);
     redPacketMessage.setSponsorName(context.getResources().getString(R.string.leanCloud_luckyMoney));
     redPacketMessage.setRedPacketType(redPacketInfo.redPacketType);
-    redPacketMessage.setReceiverId(redPacketInfo.toUserId);
+    redPacketMessage.setReceiverId(redPacketInfo.receiverId);
     redPacketMessage.setMoney(true);
     redPacketMessage.setSenderName(selfName);
     redPacketMessage.setSenderId(selfID);
@@ -127,66 +127,32 @@ public class RedPacketUtils {
   public void openRedPacket(final Context context, final LCIMRedPacketMessage message) {
     final ProgressDialog progressDialog = new ProgressDialog(context);
     progressDialog.setCanceledOnTouchOutside(false);
-
-    int chatType;
-    if (!TextUtils.isEmpty(message.getRedPacketType())) {
-      chatType = RPConstant.CHATTYPE_GROUP;
-    } else {
-      chatType = RPConstant.CHATTYPE_SINGLE;
-    }
-
-    RPRedPacketUtil.getInstance().openRedPacket(wrapperRedPacketInfo(chatType, message),
-            (FragmentActivity) context,
-            new RPRedPacketUtil.RPOpenPacketCallback() {
-              @Override
-              public void onSuccess(String senderId, String senderNickname, String myAmount) {
-//                String selfName = LeanchatUser.getCurrentUser().getUsername();
-//                String selfId = LeanchatUser.getCurrentUserId();
-//                sendRedPacketAckMsg(senderId, senderNickname, selfId, selfName, message);
-              }
-
-              @Override
-              public void showLoading() {
-                progressDialog.show();
-              }
-
-              @Override
-              public void hideLoading() {
-                progressDialog.dismiss();
-              }
-
-              @Override
-              public void onError(String code, String message) { /*错误处理*/
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-              }
-            });
-  }
-
-  /**
-   * 封装拆红包所需参数
-   *
-   * @param chatType 聊天类型
-   * @param message  EMMessage
-   * @return RedPacketInfo
-   */
-  private RedPacketInfo wrapperRedPacketInfo(int chatType, LCIMRedPacketMessage message) {
     String redPacketId = message.getRedPacketId();
-    RedPacketInfo redPacketInfo = new RedPacketInfo();
-    redPacketInfo.redPacketId = redPacketId;
-    redPacketInfo.messageDirect = getMessageDirect(message);
-    redPacketInfo.chatType = chatType;
-    return redPacketInfo;
-  }
+    String redPacketType = message.getRedPacketType();
+    RPRedPacketUtil.getInstance().openRedPacket(redPacketId, redPacketType, (FragmentActivity) context, new RPRedPacketUtil.RPOpenPacketCallback() {
 
-  private String getMessageDirect(LCIMRedPacketMessage message) {
-    String selfId = LeanchatUser.getCurrentUserId();
-    String messageDirect; /*判断发送还是接收*/
-    if (message.getFrom() != null && message.getFrom().equals(selfId)) {
-      messageDirect = RPConstant.MESSAGE_DIRECT_SEND;
-    } else {
-      messageDirect = RPConstant.MESSAGE_DIRECT_RECEIVE;
-    }
-    return messageDirect;
+      @Override
+      public void onSuccess(RedPacketInfo redPacketInfo) {
+//        String selfName = LeanchatUser.getCurrentUser().getUsername();
+//        String selfId = LeanchatUser.getCurrentUserId();
+//        sendRedPacketAckMsg(redPacketInfo.senderId, redPacketInfo.senderNickname, selfId, selfName, message);
+      }
+
+      @Override
+      public void showLoading() {
+        progressDialog.show();
+      }
+
+      @Override
+      public void hideLoading() {
+        progressDialog.dismiss();
+      }
+
+      @Override
+      public void onError(String code, String message) { /*错误处理*/
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+      }
+    });
   }
 
   /**

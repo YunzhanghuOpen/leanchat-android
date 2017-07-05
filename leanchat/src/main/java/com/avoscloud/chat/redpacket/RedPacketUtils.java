@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -124,7 +123,6 @@ public class RedPacketUtils {
     }
 
     public LCIMTransferMessage createTRMessage(RedPacketInfo redPacketInfo) {
-        Log.e("help", "--" + redPacketInfo);
         LCIMTransferMessage transferMessage = new LCIMTransferMessage();
         transferMessage.setTransferAmount(redPacketInfo.redPacketAmount);
         transferMessage.setTransferTime(redPacketInfo.transferTime);
@@ -144,8 +142,9 @@ public class RedPacketUtils {
     public void openRedPacket(final Context context, final LCIMRedPacketMessage message) {
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setCanceledOnTouchOutside(false);
-
-        RPRedPacketUtil.getInstance().openRedPacket(wrapperRedPacketInfo(message),
+        RedPacketInfo redPacketInfo = new RedPacketInfo();
+        redPacketInfo.redPacketId = message.getRedPacketId();
+        RPRedPacketUtil.getInstance().openRedPacket(redPacketInfo,
                 (FragmentActivity) context,
                 new RPRedPacketUtil.RPOpenPacketCallback() {
 
@@ -171,21 +170,6 @@ public class RedPacketUtils {
     }
 
     /**
-     * 封装拆红包所需参数
-     *
-     * @param message EMMessage
-     * @return RedPacketInfo
-     */
-    private RedPacketInfo wrapperRedPacketInfo(LCIMRedPacketMessage message) {
-        String redPacketId = message.getRedPacketId();
-        RedPacketInfo redPacketInfo = new RedPacketInfo();
-        redPacketInfo.redPacketId = redPacketId;
-        //新版不需要传入红包消息的方向和类型（单聊、群聊）
-        return redPacketInfo;
-    }
-
-
-    /**
      * 打开转账红包方法
      */
     public void openTransfer(final Context context, final LCIMTransferMessage message) {
@@ -206,7 +190,6 @@ public class RedPacketUtils {
         redPacketInfo.transferTime = message.getTransferTime();
         redPacketInfo.receiverNickname = message.getTransferReceivedNickname();
         redPacketInfo.senderNickname = message.getTransferSenderNickname();
-        Log.e("help", "---" + redPacketInfo);
         return redPacketInfo;
     }
 

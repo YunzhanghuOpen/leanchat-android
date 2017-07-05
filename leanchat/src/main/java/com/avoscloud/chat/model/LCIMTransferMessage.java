@@ -14,76 +14,102 @@ import cn.leancloud.chatkit.LCChatMessageInterface;
 @AVIMMessageType(type = LCIMTransferMessage.TRANSFER_MESSAGE_TYPE)
 public class LCIMTransferMessage extends AVIMTypedMessage implements LCChatMessageInterface {
 
-  public static final int TRANSFER_MESSAGE_TYPE = 5;
+    public static final int TRANSFER_MESSAGE_TYPE = 5;
 
-  public LCIMTransferMessage() {
-  }
-
-  /**
-   * 红包金额
-   */
-  @AVIMMessageField(name = RPConstant.EXTRA_TRANSFER_AMOUNT)
-  private String transferAmount;
-
-  /**
-   * 转账时间
-   */
-  @AVIMMessageField(name = RPConstant.EXTRA_TRANSFER_PACKET_TIME)
-  private String transferTime;
-
-  /**
-   * 是否是转账消息
-   */
-  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_IS_TRANSFER_PACKET_MESSAGE)
-  private boolean isTransferMessage;
-
-  /**
-   * 是否是转账消息
-   */
-  @AVIMMessageField(name = RPConstant.EXTRA_TRANSFER_RECEIVER_ID)
-  private String transferToUserId;
-
-  public static final Creator<LCIMTransferMessage> CREATOR = new AVIMMessageCreator<LCIMTransferMessage>(LCIMTransferMessage.class);
-
-  @Override
-  public String getShorthand() {
-    String userId = LeanchatUser.getCurrentUserId();
-    if (userId.equals(transferToUserId)) {
-      return "[转账]向你转账" + transferAmount + "元";
-    } else {
-      return "[转账]转账" + transferAmount + "元";
+    public LCIMTransferMessage() {
     }
-  }
 
-  public String getTransferAmount() {
-    return transferAmount;
-  }
+    /**
+     * 红包金额
+     */
+    @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_TRANSFER_AMOUNT)
+    private String transferAmount;
 
-  public void setTransferAmount(String transferAmount) {
-    this.transferAmount = transferAmount;
-  }
+    /**
+     * 转账时间
+     */
+    @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_TRANSFER_TIME)
+    private String transferTime;
 
-  public String getTransferTime() {
-    return transferTime;
-  }
+    /**
+     * 是否是转账消息
+     */
+    @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_IS_TRANSFER_PACKET_MESSAGE)
+    private boolean isTransferMessage;
 
-  public void setTransferTime(String transferTime) {
-    this.transferTime = transferTime;
-  }
+    /**
+     * 转账接受者id
+     */
+    @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_RECEIVER_ID)
+    private String transferToUserId;
+    /**
+     * 转账接受者昵称
+     */
+    @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_RECEIVER_NICKNAME)
+    private String transferReceivedNickname;
+    /**
+     * 转账发送者昵称
+     */
+    @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SENDER_NICKNAME)
+    private String transferSenderNickname;
 
-  public boolean isTransferMessage() {
-    return isTransferMessage;
-  }
+    public static final Creator<LCIMTransferMessage> CREATOR = new AVIMMessageCreator<LCIMTransferMessage>(LCIMTransferMessage.class);
 
-  public void setTransferMessage(boolean transferMessage) {
-    isTransferMessage = transferMessage;
-  }
+    @Override
+    public String getShorthand() {
+        String userId = LeanchatUser.getCurrentUserId();
+        if (userId.equals(transferToUserId)) {
+            return "[转账]向你转账" + transferAmount + "元";
+        } else {
+            return "[转账]转账" + transferAmount + "元";
+        }
+    }
 
-  public String getTransferToUserId() {
-    return transferToUserId;
-  }
+    public String getTransferAmount() {
+        return transferAmount;
+    }
 
-  public void setTransferToUserId(String transferToUserId) {
-    this.transferToUserId = transferToUserId;
-  }
+    public void setTransferAmount(String transferAmount) {
+        this.transferAmount = transferAmount;
+    }
+
+    public String getTransferTime() {
+        return transferTime;
+    }
+
+    public void setTransferTime(String transferTime) {
+        this.transferTime = transferTime;
+    }
+
+    public boolean isTransferMessage() {
+        return isTransferMessage;
+    }
+
+    public void setTransferMessage(boolean transferMessage) {
+        isTransferMessage = transferMessage;
+    }
+
+    public String getTransferToUserId() {
+        return transferToUserId;
+    }
+
+    public void setTransferToUserId(String transferToUserId) {
+        this.transferToUserId = transferToUserId;
+    }
+
+    public String getTransferReceivedNickname() {
+        return transferReceivedNickname;
+    }
+
+    public void setTransferReceivedNickname(String transferReceivedNickname) {
+        this.transferReceivedNickname = transferReceivedNickname;
+    }
+
+    public String getTransferSenderNickname() {
+        return transferSenderNickname;
+    }
+
+    public void setTransferSenderNickname(String transferSenderNickname) {
+        this.transferSenderNickname = transferSenderNickname;
+    }
 }

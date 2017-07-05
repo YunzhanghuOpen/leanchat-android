@@ -23,31 +23,31 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
   /**
    * 红包id
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_ID)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_ID)
   private String redPacketId;
 
   /**
    * 红包祝福语
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_GREETING)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_GREETING)
   private String greeting;
 
   /**
    * 祝福语前缀(如LeanCloud红包)
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_SPONSOR_NAME)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SPONSOR_NAME)
   private String sponsorName;
 
   /**
    * 红包的类型
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_TYPE)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_TYPE)
   private String redPacketType;
 
   /**
    * 红包接收者id
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_ID)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_RECEIVER_ID)
   private String receiverId;
 
   /**
@@ -59,13 +59,13 @@ public class LCIMRedPacketMessage extends AVIMTypedMessage implements LCChatMess
   /**
    * 红包发送者name
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_NAME)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SENDER_NICKNAME)
   private String senderName;
 
   /**
    * 红包发送者id
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_ID)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SENDER_ID)
   private String senderId;
 
   public static final Creator<LCIMRedPacketMessage> CREATOR = new AVIMMessageCreator<>(LCIMRedPacketMessage.class);

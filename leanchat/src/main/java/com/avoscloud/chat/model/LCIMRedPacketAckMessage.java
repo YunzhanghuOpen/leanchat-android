@@ -24,43 +24,43 @@ public class LCIMRedPacketAckMessage extends AVIMTypedMessage implements LCChatM
   /**
    * 红包的发送者 id
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_ID)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SENDER_ID)
   private String senderId;
 
   /**
    * 红包的发送者 name
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_SENDER_NAME)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SENDER_NICKNAME)
   private String senderName;
 
   /**
    * 红包的接收者 id
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_ID)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_RECEIVER_ID)
   private String recipientId;
 
   /**
    * 红包的接收者 name
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_RECEIVER_NAME)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_RECEIVER_NICKNAME)
   private String recipientName;
 
   /**
    * 红包的类型
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_TYPE)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_TYPE)
   private String redPacketType;
 
   /**
    * 祝福语
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_RED_PACKET_GREETING)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_GREETING)
   private String greeting;
 
   /**
    * 祝福语前缀(如LeanCloud红包)
    */
-  @AVIMMessageField(name = RPConstant.EXTRA_SPONSOR_NAME)
+  @AVIMMessageField(name = RPConstant.MESSAGE_ATTR_RED_PACKET_SPONSOR_NAME)
   private String sponsorName;
 
   /**

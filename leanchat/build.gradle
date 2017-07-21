@@ -9,7 +9,6 @@ android {
         minSdkVersion 15
         targetSdkVersion 23
         multiDexEnabled true
-        resValue "string", "rp_provider_authorities_name","${applicationId}.FileProvider"
     }
 
     buildTypes {

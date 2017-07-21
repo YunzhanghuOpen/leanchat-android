@@ -67,6 +67,8 @@ dependencies {
     compile files('libs/alipaySdk-20160516.jar')
     compile files('libs/glide-3.6.1.jar')
     compile files('libs/volley-1.0.19.jar')
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
 }
 ```
 
@@ -167,11 +169,13 @@ RedPacket.getInstance().setDebugMode(true);
 
 ## 注册红包消息组件
 * Application的onCreate方法中
+
 ```java
 AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketMessage.class);
 AVIMMessageManager.registerAVIMMessageType(LCIMRedPacketAckMessage.class);
 AVIMMessageManager.registerAVIMMessageType(LCIMTransferMessage.class);
 ```
+
 ## 发红包及转账
 
 ### 添加红包按钮

@@ -9,6 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 23
         multiDexEnabled true
+        resValue "string", "rp_provider_authorities_name","${applicationId}.FileProvider"
     }
 
     buildTypes {
@@ -40,11 +41,13 @@ dependencies {
     compile files('libs/volley-1.0.19.jar')
 
     compile('cn.leancloud.android:chatkit:1.0.+')
-    compile('com.yunzhanghu.redpacket:redpacket-wallet:3.5.0')
+    compile('com.yunzhanghu.redpacket:redpacket-wallet:3.5.1')
 
     compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
     compile 'cn.leancloud.android:avoscloud-statistics:v3.4.5@aar'
     compile 'org.apache.httpcomponents:httpmime:4.2.4'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.github.stuxuhai:jpinyin:1.0'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
 }
